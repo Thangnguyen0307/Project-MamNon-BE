@@ -1,3 +1,5 @@
+import UserSchema from '../schemas/user.schema.js';
+
 export const userPaths = {   
     '/api/user/': {
         get: {
@@ -39,14 +41,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                fullName: { type: 'string', example: 'Nguyễn Văn A' },
-                                role: { type: 'string', example: 'TEACHER' },
-                                isActive: { type: 'boolean', example: true }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserRequest
                     }
                 }
             },
@@ -79,12 +74,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                isActive: { type: 'boolean', example: false }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserStatusRequest
                     }
                 }
             },
@@ -106,12 +96,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                role: { type: 'string', example: 'TEACHER' }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserRoleRequest
                     }
                 }
             },

@@ -17,10 +17,10 @@ export const userService = {
         return await User.findById(id);
     },
 
-    async updateUser(id, { fullName, role, isActive }) {
+    async updateUser(id, { fullName}) {
         return await User.findByIdAndUpdate(
             id,
-            { fullName, role, isActive },
+            { fullName },
             { new: true }
         );
     },
