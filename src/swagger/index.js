@@ -138,6 +138,28 @@ const swaggerDocument = {
                 }
             }
         },
+        '/api/auth/update-password': {
+            put: {
+                tags: ['Auths'],
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: AuthSchema.UpdatePasswordRequest,
+                        }
+                    }
+                },
+                responses: {
+                    200: {
+                        description: 'Cập nhật mật khẩu thành công'
+                    },
+                    400: {
+                        description: 'Dữ liệu không hợp lệ'
+                    },
+                }
+            }
+        },
 
         //------------------- API ADMIN
         "/api/admins/create-account": {
