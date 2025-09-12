@@ -1,14 +1,16 @@
+import UserSchema from '../schemas/user.schema.js';
+
 export const userPaths = {   
     '/api/user/': {
         get: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin lấy danh sách tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'page', in: 'query', schema: { type: 'integer', example: 1 } },
                 { name: 'limit', in: 'query', schema: { type: 'integer', example: 20 } },
                 { name: 'role', in: 'query', schema: { type: 'string', example: 'TEACHER' } },
-                { name: 'keyword', in: 'query', schema: { type: 'string', example: 'Nguyen' } }
+                { name: 'keyword', in: 'query', schema: { type: 'string', example: 'Name' } }
             ],
             responses: {
                 200: { description: 'Danh sách tài khoản' }
@@ -17,8 +19,8 @@ export const userPaths = {
     },
     '/api/user/{id}': {
         get: {
-            tags: ['Admin'],
-            summary: 'Admin xem chi tiết tài khoản',
+            tags: ['Users'],
+            summary: 'Xem chi tiết tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
@@ -29,8 +31,8 @@ export const userPaths = {
             }
         },
         put: {
-            tags: ['Admin'],
-            summary: 'Admin cập nhật thông tin tài khoản',
+            tags: ['Users'],
+            summary: 'Cập nhật thông tin tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
@@ -39,14 +41,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                fullName: { type: 'string', example: 'Nguyễn Văn A' },
-                                role: { type: 'string', example: 'TEACHER' },
-                                isActive: { type: 'boolean', example: true }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserRequest
                     }
                 }
             },
@@ -56,8 +51,9 @@ export const userPaths = {
             }
         },
         delete: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin xóa tài khoản',
+            security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
             ],
@@ -68,8 +64,8 @@ export const userPaths = {
         }
     },
     '/api/user/{id}/status': {
-        patch: {
-            tags: ['Admin'],
+        put: {
+            tags: ['Users'],
             summary: 'Admin khóa/mở khóa tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -79,12 +75,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                isActive: { type: 'boolean', example: false }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserStatusRequest
                     }
                 }
             },
@@ -95,8 +86,8 @@ export const userPaths = {
         }
     },
     '/api/user/{id}/role': {
-        patch: {
-            tags: ['Admin'],
+        put: {
+            tags: ['Users'],
             summary: 'Admin đổi role tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -106,12 +97,7 @@ export const userPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                role: { type: 'string', example: 'TEACHER' }
-                            }
-                        }
+                        schema: UserSchema.UpdateUserRoleRequest
                     }
                 }
             },

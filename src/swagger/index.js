@@ -1,6 +1,7 @@
 import { MailType } from '../constants/mail.constant.js';
 import AuthSchema from '../schemas/auth.schema.js';
 import AdminSchema from '../schemas/admin.schema.js';
+import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 const swaggerDocument = {
     openapi: '3.0.0',
@@ -201,6 +202,7 @@ const swaggerDocument = {
         schemas: {
             ...AuthSchema,
             ...AdminSchema,
+            ...UserSchema,
         },
         securitySchemes: {
             bearerAuth: {
