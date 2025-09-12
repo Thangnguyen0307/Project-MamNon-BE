@@ -20,7 +20,7 @@ export const userPaths = {
     '/api/user/{id}': {
         get: {
             tags: ['Users'],
-            summary: 'Admin xem chi tiết tài khoản',
+            summary: 'Xem chi tiết tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
@@ -32,7 +32,7 @@ export const userPaths = {
         },
         put: {
             tags: ['Users'],
-            summary: 'Admin cập nhật thông tin tài khoản',
+            summary: 'Cập nhật thông tin tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
