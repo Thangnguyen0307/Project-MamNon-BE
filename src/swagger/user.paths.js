@@ -68,7 +68,7 @@ export const userPaths = {
         }
     },
     '/api/user/{id}/status': {
-        patch: {
+        put: {
             tags: ['Admin'],
             summary: 'Admin khóa/mở khóa tài khoản',
             security: [{ bearerAuth: [] }],
@@ -95,7 +95,7 @@ export const userPaths = {
         }
     },
     '/api/user/{id}/role': {
-        patch: {
+        put: {
             tags: ['Admin'],
             summary: 'Admin đổi role tài khoản',
             security: [{ bearerAuth: [] }],
