@@ -47,6 +47,10 @@ async function sendMail(to, type, data = {}) {
             subject = "Khôi phục mật khẩu";
             templateFile = "reset-password.html";
             break;
+        case MailType.ACCOUNT_CREATED:
+            subject = "Tài khoản của bạn đã được tạo";
+            templateFile = "account-created.html";
+            break;
         default:
             break;
     }
