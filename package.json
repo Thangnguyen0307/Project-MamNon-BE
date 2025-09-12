@@ -1,0 +1,38 @@
+{
+  "type": "module",
+  "name": "ragdb-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch src/app.js",
+    "start": "node src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thangnguyen0307/RagDB-BE.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Thangnguyen0307/RagDB-BE/issues"
+  },
+  "homepage": "https://github.com/Thangnguyen0307/RagDB-BE#readme",
+  "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.1",
+    "handlebars": "^4.7.8",
+    "joi": "^18.0.1",
+    "joi-to-swagger": "^6.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
+    "nodemailer": "^7.0.6",
+    "swagger-ui-express": "^5.0.1",
+    "ua-parser-js": "^2.0.5"
+  }
+}
