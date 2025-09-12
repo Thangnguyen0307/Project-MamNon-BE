@@ -1,15 +1,7 @@
 import mongoose from 'mongoose';
 
 const levelSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+  name: { type: String, required: true, unique: true }, // Mầm, Chồi, Lá
+}, { timestamps: true });
 
-levelSchema.virtual('id').get(function() {
-  return this._id.toHexString();
-});
-
-export default mongoose.model('Level', levelSchema);
+export const Level = mongoose.model('Level', levelSchema);
