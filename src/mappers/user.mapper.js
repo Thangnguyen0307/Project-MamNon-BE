@@ -4,5 +4,6 @@ export const toUserResponse = (user) => {
         email: user.email,
         role: user.role,
         fullName: user.fullName,
+        isActive: user.isActive,
     };
 };

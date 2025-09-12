@@ -3,14 +3,14 @@ import UserSchema from '../schemas/user.schema.js';
 export const userPaths = {   
     '/api/user/': {
         get: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin lấy danh sách tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'page', in: 'query', schema: { type: 'integer', example: 1 } },
                 { name: 'limit', in: 'query', schema: { type: 'integer', example: 20 } },
                 { name: 'role', in: 'query', schema: { type: 'string', example: 'TEACHER' } },
-                { name: 'keyword', in: 'query', schema: { type: 'string', example: 'Nguyen' } }
+                { name: 'keyword', in: 'query', schema: { type: 'string', example: 'Name' } }
             ],
             responses: {
                 200: { description: 'Danh sách tài khoản' }
@@ -19,7 +19,7 @@ export const userPaths = {
     },
     '/api/user/{id}': {
         get: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin xem chi tiết tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -31,7 +31,7 @@ export const userPaths = {
             }
         },
         put: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin cập nhật thông tin tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -51,8 +51,9 @@ export const userPaths = {
             }
         },
         delete: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin xóa tài khoản',
+            security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
             ],
@@ -64,7 +65,7 @@ export const userPaths = {
     },
     '/api/user/{id}/status': {
         put: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin khóa/mở khóa tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -86,7 +87,7 @@ export const userPaths = {
     },
     '/api/user/{id}/role': {
         put: {
-            tags: ['Admin'],
+            tags: ['Users'],
             summary: 'Admin đổi role tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
