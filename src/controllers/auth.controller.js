@@ -101,4 +101,4 @@ const logout = async (req, res) => {
     }
 };
 
-export { login, register, resetPassword, introspect, refreshToken, sendOtp, logout };
+export { login, register, resetPassword, refreshToken, sendOtp, logout };
