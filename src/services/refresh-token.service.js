@@ -83,12 +83,4 @@ export const refreshTokenService = {
             await tokenDoc.save();
         }
     },
-
-    async revokeAllByUser(userId, ip) {
-    const now = new Date();
-    await RefreshToken.updateMany(
-        { user: userId, revokedAt: null },
-        { $set: { revokedAt: now, revokedByIp: ip } }
-    );
-}
 };

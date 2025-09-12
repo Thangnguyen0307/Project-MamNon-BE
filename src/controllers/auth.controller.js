@@ -1,4 +1,5 @@
 import { authService } from "../services/auth.service.js";
+import { jwtUtils } from "../utils/jwt.util.js";
 
 const login = async (req, res) => {
     try {
@@ -56,6 +57,20 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const introspect = async (req, res) => {
+    const { accessToken } = req.body;
+
+    if (!accessToken) {
+        return res.json({ active: false });
+    }
+    try {
+        // Verify access token
+        jwtUtils.verifyAccessToken(accessToken);
+        return res.json({ active: true });
+    } catch (err) {
+        return res.json({ active: false });
+    }
+};
 
 const refreshToken = async (req, res) => {
     try {
@@ -100,4 +115,4 @@ const logout = async (req, res) => {
     }
 };
 
-export { login, register, resetPassword, refreshToken, sendOtp, logout };
+export { login, register, resetPassword, introspect, refreshToken, sendOtp, logout };

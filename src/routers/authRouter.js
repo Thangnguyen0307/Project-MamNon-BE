@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, logout, refreshToken, resetPassword, sendOtp } from '../controllers/auth.controller.js';
+import { login, logout, refreshToken, resetPassword } from '../controllers/auth.controller.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { loginSchema, resetPasswordSchema } from '../validations/auth.validation.js';
 import { clientInfo } from '../middlewares/client-info.middleware.js';
@@ -11,6 +11,6 @@ authRouter.post('/login', validate(loginSchema), clientInfo, login);
 authRouter.put('/reset-password', validate(resetPasswordSchema), clientInfo, resetPassword);
 authRouter.post('/refresh-token', clientInfo, refreshToken);
 authRouter.post('/logout', clientInfo, logout);
-authRouter.post('/send-otp', sendOtp);
+
 
 export default authRouter;

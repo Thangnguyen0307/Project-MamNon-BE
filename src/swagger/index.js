@@ -1,6 +1,7 @@
 import { MailType } from '../constants/mail.constant.js';
 import AuthSchema from '../schemas/auth.schema.js';
-import AdminSchema from '../schemas/admin.schema.js';
+import { classroomSwagger, classroomSchemas } from './classroom.swagger.js';
+import { levelSwagger, levelSchemas } from './level.swagger.js';
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
@@ -8,174 +9,106 @@ const swaggerDocument = {
         version: '1.0.0',
     },
     paths: {
-        //------------------- API AUTH
-        '/api/auth/login': {
-            post: {
-                tags: ['Auths'],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: AuthSchema.LoginRequest,
-                        }
-                    }
-                },
-                responses: {
-                    200: {
-                        description: 'Đăng nhập thành công',
-                    },
-                    400: {
-                        description: 'Dữ liệu không hợp lệ',
-                    },
-                }
-            }
-        },
-        '/api/auth/reset-password': {
-            put: {
-                tags: ['Auths'],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: AuthSchema.ResetPasswordRequest,
-                        }
-                    }
-                },
-                responses: {
-                    200: {
-                        description: 'Đặt lại mật khẩu thành công'
-                    },
-                    400: {
-                        description: 'Dữ liệu không hợp lệ'
-                    }
-                }
-            }
-        },
-        "/api/auth/refresh-token": {
-            post: {
-                tags: ["Auths"],
-                summary: "Làm mới token",
-                requestBody: {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: AuthSchema.RefreshTokenRequest,
-                        }
-                    }
-                },
-                responses: {
-                    200: {
-                        description: "Trả về access token mới",
-                    },
-                }
-            }
-        },
-        "/api/auth/logout": {
-            post: {
-                tags: ["Auths"],
-                summary: "Đăng xuất",
-                description: "Thu hồi refresh token và đăng xuất người dùng.",
-                requestBody: {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: AuthSchema.LogoutRequest
-                        }
-                    }
-                },
-                responses: {
-                    200: {
-                        description: "Đăng xuất thành công, refresh token đã bị thu hồi",
-                    },
-                    400: {
-                        description: "Dữ liệu không hợp lệ hoặc thiếu refreshToken",
-                    },
-                    401: {
-                        description: "Token không hợp lệ hoặc đã hết hạn",
-                    },
-                    500: {
-                        description: "Lỗi hệ thống",
-                    }
-                }
-            }
-        },
-        "/api/auth/send-otp": {
-            post: {
-                tags: ["Auths"],
-                summary: "Gửi OTP về email",
-                description: "Gửi OTP theo loại mail (MailType).",
-                parameters: [
-                    {
-                        name: "type",
-                        in: "query",
+        ...{
+            '/api/auth/login': {
+                post: {
+                    tags: ['Auths'],
+                    requestBody: {
                         required: true,
-                        schema: {
-                            type: "string",
-                            enum: [MailType.RESET_PASSWORD],
+                        content: {
+                            'application/json': {
+                                schema: AuthSchema.LoginRequest,
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'Đăng nhập thành công',
                         },
-                        description: "Loại OTP cần gửi",
-                        example: "RESET_PASSWORD"
-                    }
-                ],
-                requestBody: {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: AuthSchema.SendOtpRequest
-                        }
-                    }
-                },
-                responses: {
-                    200: {
-                        description: "Gửi OTP thành công",
-                    },
-                    400: {
-                        description: "Dữ liệu không hợp lệ hoặc type sai",
-                    },
-                    500: {
-                        description: "Lỗi hệ thống",
+                        400: {
+                            description: 'Dữ liệu không hợp lệ',
+                        },
                     }
                 }
-            }
-        },
-
-        //------------------- API ADMIN
-        "/api/admins/create-account": {
-            post: {
-                tags: ["Admins"],
-                summary: "Tạo tài khoản người dùng mới",
-                description: "Chỉ ADMIN được phép tạo tài khoản, mật khẩu sẽ được gửi qua email.",
-                security: [{ bearerAuth: [] }],
-                requestBody: {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: AdminSchema.CreateAccountRequest
+            },
+            '/api/auth/reset-password': {
+                put: {
+                    tags: ['Auths'],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: AuthSchema.ResetPasswordRequest,
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: 'Đặt lại mật khẩu thành công'
+                        },
+                        400: {
+                            description: 'Dữ liệu không hợp lệ'
                         }
                     }
-                },
-                responses: {
-                    201: {
-                        description: "Tài khoản đã được tạo và gửi mật khẩu qua email",
+                }
+            },
+            "/api/auth/refresh-token": {
+                post: {
+                    tags: ["Auths"],
+                    summary: "Làm mới token",
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: AuthSchema.RefreshTokenRequest,
+                            }
+                        }
                     },
-                    400: {
-                        description: "Email đã tồn tại hoặc dữ liệu không hợp lệ",
-                    },
-                    401: {
-                        description: "Không có quyền tạo tài khoản",
-                    },
-                    500: {
-                        description: "Lỗi hệ thống",
+                    responses: {
+                        200: {
+                            description: "Trả về access token mới",
+                        },
                     }
                 }
-            }
+            },
+            "/api/auth/logout": {
+                post: {
+                    tags: ["Auths"],
+                    summary: "Đăng xuất",
+                    description: "Thu hồi refresh token và đăng xuất người dùng.",
+                    requestBody: {
+                        required: true,
+                        content: {
+                            "application/json": {
+                                schema: AuthSchema.LogoutRequest
+                            }
+                        }
+                    },
+                    responses: {
+                        200: {
+                            description: "Đăng xuất thành công, refresh token đã bị thu hồi",
+                        },
+                        400: {
+                            description: "Dữ liệu không hợp lệ hoặc thiếu refreshToken",
+                        },
+                        401: {
+                            description: "Token không hợp lệ hoặc đã hết hạn",
+                        },
+                        500: {
+                            description: "Lỗi hệ thống",
+                        }
+                    }
+                }
+            },
         },
-
+        ...classroomSwagger,
+        ...levelSwagger
     },
     components: {
         schemas: {
             ...AuthSchema,
-            ...AdminSchema,
+            ...classroomSchemas,
+            ...levelSchemas
         },
         securitySchemes: {
             bearerAuth: {
@@ -186,5 +119,4 @@ const swaggerDocument = {
         },
     },
 };
-
 export default swaggerDocument;

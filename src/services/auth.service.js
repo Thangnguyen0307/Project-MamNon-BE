@@ -2,10 +2,12 @@ import { toUserResponse } from "../mappers/user.mapper.js";
 import { User } from "../models/user.model.js";
 import { comparePassword, hashPassword } from "../utils/bcrypt.util.js";
 import { otpService } from '../services/otp.service.js';
-import { jwtUtils } from "../utils/jwt.util.js";
-import { refreshTokenService } from "./refresh-token.service.js";
 import { sendMail } from "./mail.service.js";
+import { jwtUtils } from "../utils/jwt.util.js";
+import { RefreshToken } from "../models/refreshToken.model.js";
+import { MailType } from "../constants/mail.constant.js";
 import { env } from "../config/environment.js";
+import { refreshTokenService } from "./refresh-token.service.js";
 
 export const authService = {
 
@@ -41,7 +43,11 @@ export const authService = {
 
         await user.save();
 
-        await refreshTokenService.revokeAllByUser(user._id, ip);
+        await RefreshToken.updateMany(
+            { user: user._id, revokedAt: null },
+            { $set: { revokedAt: new Date(), revokedByIp: ip } }
+        );
+
 
         //Generate token
         const accessToken = jwtUtils.signAccessToken(user);
@@ -75,29 +81,5 @@ export const authService = {
         await refreshTokenService.revoke(refreshToken, ip);
 
         return { message: "Đăng xuất thành công" };
-    },
-
-    async sendOtp(email, type) {
-        const otp = await otpService.generate(email);
-
-
-        let isExist;
-        switch (type) {
-            case 'RESET_PASSWORD':
-                isExist = await User.findOne({ email });
-                if (!isExist) {
-                    throw { status: 404, message: "Không tìm thấy người dùng" };
-                }
-                break;
-            default:
-                break;
-
-        }
-
-        await sendMail(
-            email,
-            type,
-            { otp, otpExpiresInMinutes: env.OTP_EXPIRE_MINUTES }
-        );
     },
 };
