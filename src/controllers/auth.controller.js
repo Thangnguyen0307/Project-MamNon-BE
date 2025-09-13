@@ -1,5 +1,4 @@
 import { authService } from "../services/auth.service.js";
-import { jwtUtils } from "../utils/jwt.util.js";
 
 const login = async (req, res) => {
     try {
@@ -57,21 +56,6 @@ const resetPassword = async (req, res) => {
     }
 };
 
-const introspect = async (req, res) => {
-    const { accessToken } = req.body;
-
-    if (!accessToken) {
-        return res.json({ active: false });
-    }
-    try {
-        // Verify access token
-        jwtUtils.verifyAccessToken(accessToken);
-        return res.json({ active: true });
-    } catch (err) {
-        return res.json({ active: false });
-    }
-};
-
 const refreshToken = async (req, res) => {
     try {
         const ip = req.clientIp;        // đã parse sẵn
@@ -115,4 +99,23 @@ const logout = async (req, res) => {
     }
 };
 
-export { login, register, resetPassword, introspect, refreshToken, sendOtp, logout };
+const updatePassword = async (req, res) => {
+    try {   
+        // Lấy currentPassword và newPassword từ body
+        const { currentPassword, newPassword } = req.body;
+        // Lấy userId từ payload (nếu có) hoặc từ req.user (nếu có middleware xác thực)
+        const userId = req.payload?.userId || req.user?._id; 
+
+        if (!userId) {
+            return res.status(401).json({ message: "Không xác định được người dùng" });
+        }
+
+        await authService.updatePassword(userId, currentPassword, newPassword);
+
+        res.status(200).json({message: "Đổi mật khẩu thành công",});
+    } catch (err) {
+        res.status(err.status || 500).json({ message: err.message || "Lỗi server" });   
+    }
+}
+
+export { login, register, resetPassword, refreshToken, sendOtp, logout, updatePassword };

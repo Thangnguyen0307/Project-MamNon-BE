@@ -7,12 +7,14 @@ import swaggerUi from 'swagger-ui-express';
 import { seedAdminUser } from './seeds/seedAdmin.js';
 import { seedLevels } from './seeds/seedLevel.js';
 import rootRouter from './routers/rootRouter.js';
+import userRouter from './routers/userRouter.js';
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 app.use(express.static('.'))
+app.use('/api/user', userRouter);
 
 app.listen(env.PORT, () => {
     console.log(`🚀 Server is running on port: ${env.PORT}`);

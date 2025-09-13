@@ -70,3 +70,20 @@ export const logoutSchema = Joi.object({
     }),
 }).options({ abortEarly: false, stripUnknown: true });
 
+export const updatePasswordSchema = Joi.object({
+    currentPassword: Joi.string()
+        .required()
+        .messages({
+            'string.empty': 'Mật khẩu hiện tại không được để trống',
+            'any.required': 'Mật khẩu hiện tại là bắt buộc',
+        }),
+
+    newPassword: Joi.string()
+        .required()
+        .not(Joi.ref('currentPassword'))
+        .messages({
+            'string.empty': 'Mật khẩu mới không được để trống',
+            'any.required': 'Mật khẩu mới là bắt buộc',
+            'any.invalid': 'Mật khẩu mới không được giống mật khẩu hiện tại',   
+        })
+}).options({ abortEarly: false, stripUnknown: true });
