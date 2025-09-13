@@ -1,6 +1,7 @@
-export const validate = (schema) => {
+export const validate = (schema, source = 'body') => {
     return (req, res, next) => {
-        const { error, value } = schema.validate(req.body, { abortEarly: false });
+        const dataToValidate = req[source];
+        const { error, value } = schema.validate(dataToValidate, { abortEarly: false });
 
         if (error) {
             const details = error.details.map((err) => ({
@@ -9,12 +10,16 @@ export const validate = (schema) => {
             }));
 
             return res.status(400).json({
+                success: false,
                 message: 'Dữ liệu không hợp lệ',
                 errors: details
             });
         }
 
-        req.body = value;
+        // Chỉ gán lại nếu không phải query params
+        if (source !== 'query') {
+            req[source] = value;
+        }
         next();
     };
 };

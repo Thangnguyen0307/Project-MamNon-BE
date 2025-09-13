@@ -1,15 +1,21 @@
 import express from 'express';
-import * as levelController from '../controllers/level.controller.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
-import validate from '../middlewares/validate.middleware.js';
-import { createLevelSchema, updateLevelSchema } from '../validations/level.validation.js';
+import { createLevel, getAllLevels, getLevelById, updateLevel, deleteLevel } from '../controllers/level.controller.js';
+import { authenticate, authorize } from '../middlewares/auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { ROLE } from '../constants/role.constant.js';
+import { 
+    createLevelSchema, 
+    updateLevelSchema, 
+    getLevelsQuerySchema 
+} from '../validations/level.validation.js';
 
-const router = express.Router();
+const levelRouter = express.Router();
 
-router.post('/', authMiddleware, validate(createLevelSchema), levelController.createLevel);
-router.get('/', levelController.getAllLevels);
-router.get('/:id', levelController.getLevelById);
-router.put('/:id', authMiddleware, validate(updateLevelSchema), levelController.updateLevel);
-router.delete('/:id', authMiddleware, levelController.deleteLevel);
 
-export default router;
+levelRouter.post('/', authenticate, authorize(ROLE.ADMIN), validate(createLevelSchema), createLevel);
+levelRouter.get('/', authenticate, validate(getLevelsQuerySchema, 'query'), getAllLevels);
+levelRouter.get('/:id', authenticate, getLevelById);
+levelRouter.put('/:id', authenticate, authorize(ROLE.ADMIN), validate(updateLevelSchema), updateLevel);
+levelRouter.delete('/:id', authenticate, authorize(ROLE.ADMIN), deleteLevel);
+
+export default levelRouter;

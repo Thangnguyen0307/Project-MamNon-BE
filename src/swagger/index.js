@@ -1,7 +1,9 @@
 import { MailType } from '../constants/mail.constant.js';
 import AuthSchema from '../schemas/auth.schema.js';
-import { classroomSwagger, classroomSchemas } from './classroom.swagger.js';
-import { levelSwagger, levelSchemas } from './level.swagger.js';
+import LevelSchema from '../schemas/level.schema.js';
+import ClassSchema from '../schemas/class.schema.js';
+import { classSwagger } from './class.swagger.js';
+import { levelSwagger } from './level.swagger.js';
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
@@ -101,14 +103,14 @@ const swaggerDocument = {
                 }
             },
         },
-        ...classroomSwagger,
+        ...classSwagger,
         ...levelSwagger
     },
     components: {
         schemas: {
             ...AuthSchema,
-            ...classroomSchemas,
-            ...levelSchemas
+            ...LevelSchema,
+            ...ClassSchema
         },
         securitySchemes: {
             bearerAuth: {

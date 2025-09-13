@@ -1,4 +1,4 @@
-import Level from '../models/level.model.js';
+import { Level } from '../models/level.model.js';
 
 export const seedLevels = async () => {
   try {
