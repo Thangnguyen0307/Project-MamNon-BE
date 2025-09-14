@@ -5,8 +5,11 @@ import { toLevelResponse } from "../mappers/level.mapper.js";
 export const levelService = {
     
     async create(levelData) {
-        // Check if level name already exists
-        const existingLevel = await Level.findOne({ name: levelData.name });
+        // Check if level name already exists (case insensitive)
+        const existingLevel = await Level.findOne({ 
+            name: { $regex: new RegExp(`^${levelData.name}$`, 'i') } 
+        });
+        
         if (existingLevel) {
             throw { status: 400, message: "Cấp độ đã tồn tại" };
         }

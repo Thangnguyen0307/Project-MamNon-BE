@@ -1,8 +1,7 @@
-import { Class } from '../models/class.model.js';
 import { classService } from '../services/class.service.js';
-import mongoose from 'mongoose';
 
-export const createClass = async (req, res, next) => {
+
+export const createClass = async (req, res) => {
   try {
     const classInstance = await classService.create(req.body);
     
@@ -12,11 +11,14 @@ export const createClass = async (req, res, next) => {
       data: classInstance
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const getAllClasses = async (req, res, next) => {
+export const getAllClasses = async (req, res) => {
   try {
     const result = await classService.getAll(req.query);
     
@@ -26,11 +28,14 @@ export const getAllClasses = async (req, res, next) => {
       data: result
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const getClassById = async (req, res, next) => {
+export const getClassById = async (req, res) => {
   try {
     const classInstance = await classService.getById(req.params.id);
     
@@ -40,11 +45,11 @@ export const getClassById = async (req, res, next) => {
       data: classInstance
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ success: false, message: error.message || "L?i server" });
   }
 };
 
-export const updateClass = async (req, res, next) => {
+export const updateClass = async (req, res) => {
   try {
     const classInstance = await classService.update(req.params.id, req.body);
     
@@ -54,11 +59,11 @@ export const updateClass = async (req, res, next) => {
       data: classInstance
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ success: false, message: error.message || "L?i server" });
   }
 };
 
-export const deleteClass = async (req, res, next) => {
+export const deleteClass = async (req, res) => {
   try {
     const result = await classService.delete(req.params.id);
     
@@ -68,6 +73,6 @@ export const deleteClass = async (req, res, next) => {
       data: null
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ success: false, message: error.message || "L?i server" });
   }
 };

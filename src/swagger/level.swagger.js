@@ -5,7 +5,6 @@ export const levelSwagger = {
     get: {
       tags: ['Levels'],
       summary: 'Lấy danh sách tất cả levels',
-      security: [{ bearerAuth: [] }],
       responses: {
         200: {
           description: 'Lấy danh sách levels thành công',
@@ -84,7 +83,6 @@ export const levelSwagger = {
     get: {
       tags: ['Levels'],
       summary: 'Lấy thông tin level theo ID',
-      security: [{ bearerAuth: [] }],
       parameters: [
         {
           in: 'path',

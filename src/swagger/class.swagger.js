@@ -5,7 +5,6 @@ export const classSwagger = {
     get: {
       tags: ['Classes'],
       summary: 'Lấy danh sách tất cả lớp học',
-      security: [{ bearerAuth: [] }],
       parameters: [
         {
           in: 'query',
@@ -143,7 +142,6 @@ export const classSwagger = {
     get: {
       tags: ['Classes'],
       summary: 'Lấy thông tin lớp học theo ID',
-      security: [{ bearerAuth: [] }],
       parameters: [
         {
           in: 'path',

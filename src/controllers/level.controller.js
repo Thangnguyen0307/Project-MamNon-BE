@@ -1,7 +1,6 @@
-import { Level } from '../models/level.model.js';
 import { levelService } from '../services/level.service.js';
 
-export const createLevel = async (req, res, next) => {
+export const createLevel = async (req, res) => {
   try {
     const level = await levelService.create(req.body);
     
@@ -11,11 +10,14 @@ export const createLevel = async (req, res, next) => {
       data: level
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const getAllLevels = async (req, res, next) => {
+export const getAllLevels = async (req, res) => {
   try {
     const result = await levelService.getAll(req.query);
     
@@ -25,11 +27,14 @@ export const getAllLevels = async (req, res, next) => {
       data: result
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const getLevelById = async (req, res, next) => {
+export const getLevelById = async (req, res) => {
   try {
     const level = await levelService.getById(req.params.id);
     
@@ -39,11 +44,14 @@ export const getLevelById = async (req, res, next) => {
       data: level
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const updateLevel = async (req, res, next) => {
+export const updateLevel = async (req, res) => {
   try {
     const level = await levelService.update(req.params.id, req.body);
     
@@ -53,11 +61,14 @@ export const updateLevel = async (req, res, next) => {
       data: level
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
 
-export const deleteLevel = async (req, res, next) => {
+export const deleteLevel = async (req, res) => {
   try {
     const result = await levelService.delete(req.params.id);
     
@@ -67,6 +78,9 @@ export const deleteLevel = async (req, res, next) => {
       data: null
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 500).json({ 
+      success: false,
+      message: error.message || "Lỗi server" 
+    });
   }
 };
