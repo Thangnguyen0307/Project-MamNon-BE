@@ -6,9 +6,9 @@ import { toClassResponse } from "../mappers/class.mapper.js";
 export const classService = {
     
     async create(classData) {
-        // Validate class name uniqueness within the same school year
+        // Validate class name uniqueness within the same school year (case insensitive)
         const existingClass = await Class.findOne({ 
-            name: classData.name,
+            name: { $regex: new RegExp(`^${classData.name}$`, 'i') },
             schoolYear: classData.schoolYear 
         });
         if (existingClass) {
@@ -93,10 +93,10 @@ export const classService = {
             throw { status: 404, message: "Không tìm thấy lớp học" };
         }
 
-        // Check duplicate name if name is being updated
+        // Check duplicate name if name is being updated (case insensitive)
         if (updateData.name && updateData.schoolYear) {
             const existingClass = await Class.findOne({ 
-                name: updateData.name,
+                name: { $regex: new RegExp(`^${updateData.name}$`, 'i') },
                 schoolYear: updateData.schoolYear,
                 _id: { $ne: id }
             });
