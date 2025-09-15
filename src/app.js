@@ -34,6 +34,7 @@ app.use(cors({
     credentials: true // nếu cần cookie, token
 }));
 app.use(express.static('.'))
+app.use('/images', express.static('images')); // Serve uploaded files
 
 app.listen(env.PORT, () => {
     console.log(`🚀 Server is running on port: ${env.PORT}`);
