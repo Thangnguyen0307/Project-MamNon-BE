@@ -5,10 +5,12 @@ import handlebars from "handlebars";
 import { env } from "../config/environment.js";
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,            // SSL port
+    secure: true,         // true cho port 465
     auth: {
-        user: env.MAIL_USER,
-        pass: env.MAIL_PASS,
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,  // App Password, không phải mật khẩu Gmail
     },
 });
 

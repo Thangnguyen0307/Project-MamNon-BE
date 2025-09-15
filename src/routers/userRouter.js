@@ -14,10 +14,10 @@ import {
 
 const userRouter = express.Router();
 userRouter.get('/', authenticate, authorize(ROLE.ADMIN), getUsers); // Lấy danh sách user
-userRouter.get('/my-info', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), getUserDetail); // Xem chi tiết user
-userRouter.put('/:id', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), validate(updateUserSchema), updateUser); // Cập nhật thông tin user
+userRouter.get('/my-account', authenticate, getUserDetail); // Xem chi tiết user
+userRouter.put('/my-account', authenticate, validate(updateUserSchema), updateUser); // Cập nhật thông tin user
 userRouter.put('/:id/status', authenticate, authorize(ROLE.ADMIN), validate(updateUserStatusSchema), updateUserStatus); // Khóa/mở khóa tài khoản
-userRouter.delete('/:id', authenticate, authorize(ROLE.ADMIN), deleteUser); // Xóa tài khoản
+userRouter.delete('/my-account', authenticate, deleteUser); // Xóa tài khoản
 userRouter.put('/:id/role', authenticate, authorize(ROLE.ADMIN), validate(updateUserRoleSchema), updateUserRole); // Đổi role tài khoản
 
 export default userRouter;

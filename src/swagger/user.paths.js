@@ -1,9 +1,9 @@
 import UserSchema from '../schemas/user.schema.js';
 
-export const userPaths = {   
+export const userPaths = {
     '/api/user/': {
         get: {
-            tags: ['Users'],
+            tags: ['Admins'],
             summary: 'Admin lấy danh sách tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -17,10 +17,10 @@ export const userPaths = {
             }
         }
     },
-    '/api/user/my-info': {
+    '/api/user/my-account': {
         get: {
             tags: ['Users'],
-            summary: 'Xem chi tiết tài khoản',
+            summary: 'User xem chi tiết tài khoản',
             security: [{ bearerAuth: [] }],
             responses: {
                 200: { description: 'Thông tin tài khoản' },
@@ -29,11 +29,8 @@ export const userPaths = {
         },
         put: {
             tags: ['Users'],
-            summary: 'Cập nhật thông tin tài khoản',
+            summary: 'User cập nhật thông tin tài khoản',
             security: [{ bearerAuth: [] }],
-            parameters: [
-                { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
-            ],
             requestBody: {
                 required: true,
                 content: {
@@ -49,11 +46,8 @@ export const userPaths = {
         },
         delete: {
             tags: ['Users'],
-            summary: 'Admin xóa tài khoản',
+            summary: 'User xóa tài khoản',
             security: [{ bearerAuth: [] }],
-            parameters: [
-                { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
-            ],
             responses: {
                 200: { description: 'Đã xóa user thành công' },
                 404: { description: 'User không tồn tại' }
@@ -62,7 +56,7 @@ export const userPaths = {
     },
     '/api/user/{id}/status': {
         put: {
-            tags: ['Users'],
+            tags: ['Admins'],
             summary: 'Admin khóa/mở khóa tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -84,7 +78,7 @@ export const userPaths = {
     },
     '/api/user/{id}/role': {
         put: {
-            tags: ['Users'],
+            tags: ['Admins'],
             summary: 'Admin đổi role tài khoản',
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -103,5 +97,5 @@ export const userPaths = {
                 404: { description: 'User không tồn tại' }
             }
         }
-    },    
+    },
 };

@@ -13,7 +13,7 @@ export async function getUserDetail(req, res) {
 }
 
 export async function updateUser(req, res) {
-    const user = await userService.updateUser(req.params.id, req.body);
+    const user = await userService.updateUser(req.payload.userId, req.body);
     if (!user) return res.status(404).json({ message: 'User không tồn tại' });
     res.json(user);
 }
@@ -25,7 +25,7 @@ export async function updateUserStatus(req, res) {
 }
 
 export async function deleteUser(req, res) {
-    const user = await userService.deleteUser(req.params.id);
+    const user = await userService.deleteUser(req.payload.userId);
     if (!user) return res.status(404).json({ message: 'User không tồn tại' });
     res.json({ message: 'Đã xóa user thành công' });
 }
