@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import { seedAdminUser } from './seeds/seedAdmin.js';
 import { seedLevels } from './seeds/seedLevel.js';
 import rootRouter from './routers/rootRouter.js';
+import path from "path";
 
 
 const app = express();

@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
 
     // Giáo viên chỉ có 1 lớp
     class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
+    zaloUserId: { type: String, unique: true, sparse: true },
 }, { timestamps: true });
 
 export const User = mongoose.model('User', userSchema);
