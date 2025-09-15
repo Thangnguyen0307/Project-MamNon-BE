@@ -17,14 +17,11 @@ export const userPaths = {
             }
         }
     },
-    '/api/user/{id}': {
+    '/api/user/my-info': {
         get: {
             tags: ['Users'],
             summary: 'Xem chi tiết tài khoản',
             security: [{ bearerAuth: [] }],
-            parameters: [
-                { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
-            ],
             responses: {
                 200: { description: 'Thông tin tài khoản' },
                 404: { description: 'User không tồn tại' }

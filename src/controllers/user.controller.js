@@ -6,7 +6,10 @@ export async function getUsers(req, res) {
 }
 
 export async function getUserDetail(req, res) {
-    const user = await userService.getUserDetail(req.params.id);
+    console.log(req.payload);
+    
+    // const user = await userService.getUserDetail(req.params.id);
+    return res.json(req.payload);
     if (!user) return res.status(404).json({ message: 'User không tồn tại' });
     res.json(user);
 }

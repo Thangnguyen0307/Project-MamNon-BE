@@ -10,7 +10,6 @@ const login = async (req, res) => {
 
         return res.json({
             message: "Đăng nhập thành công",
-            data: user,
             accessToken,
             refreshToken
         });
