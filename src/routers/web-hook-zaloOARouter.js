@@ -4,7 +4,7 @@ const webhookZaloRouter = express.Router();
 
 webhookZaloRouter.get('/webhook', WebhookController.handle);
 
-webhookZaloRouter.get('/', (req, res) => {
+webhookZaloRouter.get('/zalo_verifierNuAYTAlpU5Giyka8xkLO0oVNw5JBeJyFDJSs.html', (req, res) => {
     res.sendFile(
         path.join(process.cwd(), 'zalo_verifierNuAYTAlpU5Giyka8xkLO0oVNw5JBeJyFDJSs.html')
     );
