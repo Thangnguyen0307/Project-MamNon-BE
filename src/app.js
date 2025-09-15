@@ -34,6 +34,7 @@ app.use(cors({
 }));
 app.use(express.static('.'))
 app.use('/api/user', userRouter);
+app.use("/zalo_verifier", express.static(path.join(process.cwd(), "zalo_verifier")));
 
 app.listen(env.PORT, () => {
     console.log(`🚀 Server is running on port: ${env.PORT}`);
