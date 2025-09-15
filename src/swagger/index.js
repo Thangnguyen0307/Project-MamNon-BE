@@ -10,9 +10,19 @@ import AdminSchema from '../schemas/admin.schema.js';
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
-        title: 'Media API',
+        title: 'Media Mam Non API',
         version: '1.0.0',
     },
+    servers: [
+        {
+            url: 'http://localhost:8080',       // Dev local
+            description: 'Local Development',
+        },
+        {
+            url: '/projects/mam-non-media',     // Prod qua Nginx
+            description: 'Production - Techleaf',
+        },
+    ],
     paths: {
         ///------------------- API USER
         ...userPaths,

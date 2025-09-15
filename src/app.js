@@ -7,7 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import { seedAdminUser } from './seeds/seedAdmin.js';
 import { seedLevels } from './seeds/seedLevel.js';
 import rootRouter from './routers/rootRouter.js';
-import userRouter from './routers/userRouter.js';
+
 
 const app = express();
 
@@ -33,7 +33,6 @@ app.use(cors({
     credentials: true // nếu cần cookie, token
 }));
 app.use(express.static('.'))
-app.use('/api/user', userRouter);
 
 app.listen(env.PORT, () => {
     console.log(`🚀 Server is running on port: ${env.PORT}`);
@@ -42,6 +41,6 @@ app.listen(env.PORT, () => {
 seedAdminUser();
 seedLevels();
 connectToMongo();
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 app.use('/api', rootRouter);

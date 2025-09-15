@@ -6,6 +6,7 @@ import classRouter from './class.router.js';
 import levelRouter from './level.router.js';
 import adminRouter from './adminRouter.js';
 
+
 const rootRouter = express.Router();
 
 rootRouter.get('/', (req, res) => {
@@ -13,8 +14,8 @@ rootRouter.get('/', (req, res) => {
 });
 
 rootRouter.use('/auth', authRouter);
-rootRouter.use('/users', userRouter);
 rootRouter.use('/classes', classRouter);
 rootRouter.use('/levels', levelRouter);
 rootRouter.use('/admins', adminRouter);
+rootRouter.use('/user', userRouter);
 export default rootRouter;
