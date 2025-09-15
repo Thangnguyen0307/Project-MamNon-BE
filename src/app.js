@@ -8,6 +8,7 @@ import { seedAdminUser } from './seeds/seedAdmin.js';
 import { seedLevels } from './seeds/seedLevel.js';
 import rootRouter from './routers/rootRouter.js';
 import userRouter from './routers/userRouter.js';
+import path from "path";
 
 const app = express();
 
