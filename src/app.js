@@ -13,7 +13,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(express.static('.'))
+app.use(express.static('.'));
+app.use('/images', express.static('images')); // Serve uploaded files
 app.use('/api/user', userRouter);
 
 app.listen(env.PORT, () => {

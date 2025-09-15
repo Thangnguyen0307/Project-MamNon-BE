@@ -2,8 +2,10 @@ import { MailType } from '../constants/mail.constant.js';
 import AuthSchema from '../schemas/auth.schema.js';
 import LevelSchema from '../schemas/level.schema.js';
 import ClassSchema from '../schemas/class.schema.js';
+import BlogSchema from '../schemas/blog.schema.js';
 import { classSwagger } from './class.swagger.js';
 import { levelSwagger } from './level.swagger.js';
+import { blogSwagger } from './blog.swagger.js';
 import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 import AdminSchema from '../schemas/admin.schema.js';
@@ -201,13 +203,15 @@ const swaggerDocument = {
             }
         },
         ...classSwagger,
-        ...levelSwagger
+        ...levelSwagger,
+        ...blogSwagger
     },
     components: {
         schemas: {
             ...AuthSchema,
             ...LevelSchema,
             ...ClassSchema,
+            ...BlogSchema,
             ...UserSchema,
         },
         securitySchemes: {
