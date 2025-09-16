@@ -115,20 +115,17 @@ export const blogSwagger = {
       requestBody: {
         required: true,
         content: {
-          'multipart/form-data': {
+          'application/json': {
             schema: {
               type: 'object',
               properties: {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                images: { 
+                images: {
                   type: 'array',
-                  items: {
-                    type: 'string',
-                    format: 'binary'
-                  },
-                  description: 'Các file ảnh (tối đa 10 ảnh)'
+                  items: { type: 'string', description: 'URL hình ảnh đã upload từ /api/images/upload' },
+                  description: 'Danh sách URL hình ảnh liên kết với bài viết'
                 }
               },
               required: ['title', 'content', 'class']
@@ -233,17 +230,17 @@ export const blogSwagger = {
       requestBody: {
         required: true,
         content: {
-          'multipart/form-data': {
+          'application/json': {
             schema: {
               type: 'object',
               properties: {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                image: { 
-                  type: 'string', 
-                  format: 'binary',
-                  description: 'File ảnh mới (tùy chọn)'
+                images: {
+                  type: 'array',
+                  items: { type: 'string', description: 'URL hình ảnh đã upload từ /api/images/upload' },
+                  description: 'Danh sách URL hình ảnh liên kết với bài viết'
                 }
               }
             }

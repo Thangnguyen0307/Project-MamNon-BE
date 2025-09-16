@@ -6,6 +6,7 @@ import classRouter from './class.router.js';
 import levelRouter from './level.router.js';
 import adminRouter from './adminRouter.js';
 import blogRouter from './blog.router.js';
+import imageRouter from './image.router.js';
 
 const rootRouter = express.Router();
 
@@ -19,4 +20,5 @@ rootRouter.use('/classes', classRouter);
 rootRouter.use('/levels', levelRouter);
 rootRouter.use('/admins', adminRouter);
 rootRouter.use('/blogs', blogRouter);
+rootRouter.use('/images', imageRouter);
 export default rootRouter;

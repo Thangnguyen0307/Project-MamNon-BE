@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 export const blogService = {
     
-    async create(blogData, imageFiles, authorId) {
+    async create(blogData, authorId) {
         // Validate class exists
         const classInstance = await Class.findById(blogData.class);
         if (!classInstance) {
@@ -24,8 +24,8 @@ export const blogService = {
             throw { status: 404, message: "Không tìm thấy tác giả" };
         }
 
-        // Process image paths
-        const imagePaths = imageFiles ? imageFiles.map(file => `/images/blogs/${file.filename}`) : [];
+        // Only accept image URLs from blogData.images
+        const imagePaths = Array.isArray(blogData.images) ? blogData.images : [];
 
         const blog = new Blog({
             ...blogData,
@@ -53,6 +53,44 @@ export const blogService = {
         
         return toBlogResponse(blog);
     },
+        async create(blogData, authorId) {
+            // Validate class exists
+            const classInstance = await Class.findById(blogData.class);
+            if (!classInstance) {
+                throw { status: 404, message: "Không tìm thấy lớp học" };
+            }
+
+            // Validate author exists
+            const author = await User.findById(authorId);
+            if (!author) {
+                throw { status: 404, message: "Không tìm thấy tác giả" };
+            }
+
+            // Only accept image URLs from blogData.images
+            const imagePaths = Array.isArray(blogData.images) ? blogData.images : [];
+
+            const blog = new Blog({
+                ...blogData,
+                author: authorId,
+                images: imagePaths
+            });
+            await blog.save();
+            await blog.populate([
+                {
+                    path: 'author',
+                    select: 'email fullName'
+                },
+                {
+                    path: 'class',
+                    select: 'name level',
+                    populate: {
+                        path: 'level',
+                        select: 'name'
+                    }
+                }
+            ]);
+            return toBlogResponse(blog);
+        },
 
     async getAll(query = {}) {
         const { page = 1, limit = 10, search, class: classId, author } = query;
@@ -129,7 +167,7 @@ export const blogService = {
         return toBlogResponse(blog);
     },
 
-    async update(id, updateData, newImageFiles, userId) {
+    async update(id, updateData, userId) {
         const blog = await Blog.findById(id);
         if (!blog) {
             throw { status: 404, message: "Không tìm thấy bài viết" };
@@ -151,29 +189,39 @@ export const blogService = {
             }
         }
 
-        // Delete old images if new images are uploaded
-        if (newImageFiles && newImageFiles.length > 0 && blog.images && blog.images.length > 0) {
-            blog.images.forEach(imagePath => {
-                const oldImagePath = path.join(__dirname, '../../images/blogs', path.basename(imagePath));
-                try {
-                    if (fs.existsSync(oldImagePath)) {
-                        fs.unlinkSync(oldImagePath);
-                    }
-                } catch (error) {
-                    console.log('Error deleting old image:', error);
+        // Handle image deletion when updating
+        const oldImages = blog.images || [];
+        const newImages = Array.isArray(updateData.images) ? updateData.images : oldImages;
+        
+        // Find images to delete (old images not in new images list)
+        const imagesToDelete = oldImages.filter(oldImage => !newImages.includes(oldImage));
+        
+        // Delete removed images from filesystem
+        imagesToDelete.forEach(imagePath => {
+            const filename = path.basename(imagePath);
+            // Try both blogs and avatars folders
+            const blogPath = path.join(__dirname, '../../images/blogs', filename);
+            const avatarPath = path.join(__dirname, '../../images/avatars', filename);
+            
+            try {
+                if (fs.existsSync(blogPath)) {
+                    fs.unlinkSync(blogPath);
+                    console.log(`Deleted blog image: ${filename}`);
+                } else if (fs.existsSync(avatarPath)) {
+                    fs.unlinkSync(avatarPath);
+                    console.log(`Deleted avatar image: ${filename}`);
                 }
-            });
-        }
+            } catch (error) {
+                console.log('Error deleting image:', filename, error);
+            }
+        });
 
-        // Process new image paths
-        const newImagePaths = newImageFiles ? newImageFiles.map(file => `/images/blogs/${file.filename}`) : undefined;
-
-        // Update blog
+        // Update blog with new image URLs
         const updatedBlog = await Blog.findByIdAndUpdate(
             id,
             {
                 ...updateData,
-                ...(newImagePaths && { images: newImagePaths })
+                images: newImages
             },
             { new: true }
         ).populate([
@@ -190,7 +238,6 @@ export const blogService = {
                 }
             }
         ]);
-
         return toBlogResponse(updatedBlog);
     },
 
@@ -208,16 +255,24 @@ export const blogService = {
             }
         }
 
-        // Delete image files
+        // Delete all image files associated with this blog
         if (blog.images && blog.images.length > 0) {
             blog.images.forEach(imagePath => {
-                const fullImagePath = path.join(__dirname, '../../images/blogs', path.basename(imagePath));
+                const filename = path.basename(imagePath);
+                // Try both blogs and avatars folders
+                const blogPath = path.join(__dirname, '../../images/blogs', filename);
+                const avatarPath = path.join(__dirname, '../../images/avatars', filename);
+                
                 try {
-                    if (fs.existsSync(fullImagePath)) {
-                        fs.unlinkSync(fullImagePath);
+                    if (fs.existsSync(blogPath)) {
+                        fs.unlinkSync(blogPath);
+                        console.log(`Deleted blog image: ${filename}`);
+                    } else if (fs.existsSync(avatarPath)) {
+                        fs.unlinkSync(avatarPath);
+                        console.log(`Deleted avatar image: ${filename}`);
                     }
                 } catch (error) {
-                    console.log('Error deleting image:', error);
+                    console.log('Error deleting image:', filename, error);
                 }
             });
         }

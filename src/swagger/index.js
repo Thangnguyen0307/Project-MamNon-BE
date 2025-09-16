@@ -6,6 +6,7 @@ import BlogSchema from '../schemas/blog.schema.js';
 import { classSwagger } from './class.swagger.js';
 import { levelSwagger } from './level.swagger.js';
 import { blogSwagger } from './blog.swagger.js';
+import { imageSwagger } from './image.swagger.js';
 import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 import AdminSchema from '../schemas/admin.schema.js';
@@ -19,6 +20,7 @@ const swaggerDocument = {
         ///------------------- API USER
         ...userPaths,
         //------------------- API AUTH
+        ...imageSwagger,
         '/api/auth/login': {
             post: {
                 tags: ['Auths'],

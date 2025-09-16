@@ -15,8 +15,8 @@ const blogRouter = express.Router();
 
 blogRouter.get('/', validate(getBlogsQuerySchema, 'query'), blogController.getAllBlogs);
 blogRouter.get('/:id', blogController.getBlogById);
-blogRouter.post('/', authenticate, authorize(ROLE.ADMIN, ROLE.TEACHER), validateBlogRequest(createBlogSchema), uploadBlogImages, validateAfterUpload(createBlogSchema), handleMulterError, blogController.createBlog);
-blogRouter.put('/:id', authenticate, authorize(ROLE.ADMIN, ROLE.TEACHER), validateBlogRequest(updateBlogSchema), uploadBlogImages, validateAfterUpload(updateBlogSchema), handleMulterError, blogController.updateBlog);
-blogRouter.delete('/:id', authenticate, blogController.deleteBlog);
+blogRouter.post('/', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), validateBlogRequest(createBlogSchema), blogController.createBlog);
+blogRouter.put('/:id', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), validateBlogRequest(updateBlogSchema), blogController.updateBlog);
+blogRouter.delete('/:id', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), blogController.deleteBlog);
 
 export default blogRouter;

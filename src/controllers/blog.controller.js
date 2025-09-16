@@ -2,7 +2,7 @@ import { blogService } from '../services/blog.service.js';
 
 export const createBlog = async (req, res) => {
     try {
-        const blog = await blogService.create(req.body, req.files, req.payload.userId);
+        const blog = await blogService.create(req.body, req.payload.userId);
         
         res.status(201).json({
             success: true,
@@ -18,6 +18,7 @@ export const createBlog = async (req, res) => {
 };
 
 export const getAllBlogs = async (req, res) => {
+        // Removed duplicate export
     try {
         const result = await blogService.getAll(req.query);
         
@@ -53,8 +54,8 @@ export const getBlogById = async (req, res) => {
 
 export const updateBlog = async (req, res) => {
     try {
-        const blog = await blogService.update(req.params.id, req.body, req.files, req.payload.userId);
-        
+        // Only accept image URLs in req.body.images
+        const blog = await blogService.update(req.params.id, req.body, req.payload.userId);
         res.status(200).json({
             success: true,
             message: "Cập nhật bài viết thành công",
