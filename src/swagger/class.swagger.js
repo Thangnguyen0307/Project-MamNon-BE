@@ -23,7 +23,19 @@ export const classSwagger = {
           name: 'teacher',
           schema: { type: 'string' },
           description: 'Lọc theo giáo viên ID'
-        }
+        },
+        {
+        in: 'query',
+        name: 'page',
+        schema: { type: 'integer', default: 1 },
+        description: 'Trang hiện tại (mặc định = 1)'
+      },
+      {
+        in: 'query',
+        name: 'limit',
+        schema: { type: 'integer', default: 10 },
+        description: 'Số lượng item mỗi trang (mặc định = 10)'
+      }
       ],
       responses: {
         200: {
