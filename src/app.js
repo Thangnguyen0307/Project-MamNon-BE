@@ -40,6 +40,10 @@ app.listen(env.PORT, () => {
     console.log(`🚀 Server is running on port: ${env.PORT}`);
 });
 
+app.get("/", (req, res) => {
+    res.send("Server is alive!");
+});
+
 seedAdminUser();
 seedLevels();
 connectToMongo();

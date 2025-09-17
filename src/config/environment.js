@@ -14,5 +14,8 @@ export const env = {
     MAIL_PASS: process.env.MAIL_PASS,
     CORS_ORIGIN: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : ['*']
+    : ['*'],
+    ZALO_APP_ID: process.env.ZALO_APP_ID,
+    ZALO_SECRET_KEY: process.env.ZALO_SECRET_KEY,
+    ZALO_CALLBACK_URL: process.env.ZALO_CALLBACK_URL,
 }
