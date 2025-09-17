@@ -75,7 +75,7 @@ export const imageSwagger = {
     delete: {
       security: [{ bearerAuth: [] }],
       tags: ['Images'],
-      summary: 'Xóa nhiều hình ảnh cùng lúc (tự động tìm trong cả blogs và avatars)',
+      summary: 'Xóa nhiều hình ảnh cùng lúc (hỗ trợ tên file hoặc full URL)',
       requestBody: {
         required: true,
         content: {
@@ -87,10 +87,15 @@ export const imageSwagger = {
                   type: 'array',
                   items: { type: 'string' },
                   minItems: 1,
-                  description: 'Mảng tên file cần xóa (không cần biết type, tự động tìm)'
+                  description: 'Mảng tên file hoặc full URL cần xóa. Ví dụ: ["blog-123.jpg"] hoặc ["/uploadeds/2025-2026/Lớp test 2/2025-09-17/blog-123.jpg"]'
                 }
               },
-              required: ['filenames']
+              required: ['filenames'],
+              example: {
+                filenames: [
+                  "string"
+                ]
+              }
             }
           }
         }
@@ -116,9 +121,12 @@ export const imageSwagger = {
                         items: {
                           type: 'object',
                           properties: {
-                            filename: { type: 'string' },
-                            status: { type: 'string' },
-                            location: { type: 'string' }
+                            input: { type: 'string', description: 'Input gốc (filename hoặc URL)' },
+                            filename: { type: 'string', description: 'Tên file được xóa' },
+                            status: { type: 'string', enum: ['success', 'error'] },
+                            location: { type: 'string', enum: ['blog', 'avatar'] },
+                            path: { type: 'string', description: 'Full URL của file' },
+                            message: { type: 'string', description: 'Thông báo lỗi (nếu có)' }
                           }
                         }
                       }

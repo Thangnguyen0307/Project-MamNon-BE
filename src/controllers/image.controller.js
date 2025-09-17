@@ -70,40 +70,70 @@ const findFileInUploadeds = (filename) => {
     return searchRecursively(uploadedsPath);
 };
 
+// Helper function to extract filename from input (can be filename or full URL)
+const extractFilename = (input) => {
+    // If input looks like a URL (starts with /), extract filename from it
+    if (input.startsWith('/')) {
+        return path.basename(input);
+    }
+    // Otherwise, assume it's already a filename
+    return input;
+};
+
+// Helper function to get full path from input (filename or URL)
+const getFullPathFromInput = (input) => {
+    // If input is a full URL, convert it to filesystem path
+    if (input.startsWith('/uploadeds/')) {
+        // Remove leading slash and convert to filesystem path
+        const relativePath = input.substring(1); // Remove leading '/'
+        const fullPath = path.join(process.cwd(), relativePath);
+        return {
+            fullPath,
+            url: input
+        };
+    }
+    // If it's just a filename, search for it recursively
+    else {
+        return findFileInUploadeds(input);
+    }
+};
+
 export const deleteImage = async (req, res) => {
-    const { filenames } = req.body; // Nhận mảng tên file từ body
+    const { filenames } = req.body; // Nhận mảng tên file hoặc URL từ body
     
     if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
-        return res.status(400).json({ success: false, message: 'Phải cung cấp mảng tên file để xóa.' });
+        return res.status(400).json({ success: false, message: 'Phải cung cấp mảng tên file hoặc URL để xóa.' });
     }
     
     const results = [];
     let errorCount = 0;
     const urlsToRemove = []; // Track URLs that need to be removed from blogs
     
-    for (const filename of filenames) {
-        // Search for file in the entire uploadeds directory structure
-        const fileInfo = findFileInUploadeds(filename);
+    for (const input of filenames) {
+        // Get file info whether input is filename or full URL
+        const fileInfo = getFullPathFromInput(input);
         
-        if (fileInfo) {
+        if (fileInfo && fs.existsSync(fileInfo.fullPath)) {
             try {
                 fs.unlinkSync(fileInfo.fullPath);
                 urlsToRemove.push(fileInfo.url);
                 
                 // Determine location type based on URL
                 const locationType = fileInfo.url.includes('/avatar/') ? 'avatar' : 'blog';
+                const filename = path.basename(fileInfo.fullPath);
                 results.push({ 
+                    input: input,
                     filename, 
                     status: 'success', 
                     location: locationType,
                     path: fileInfo.url
                 });
             } catch (err) {
-                results.push({ filename, status: 'error', message: 'Lỗi khi xóa file: ' + err.message });
+                results.push({ input: input, status: 'error', message: 'Lỗi khi xóa file: ' + err.message });
                 errorCount++;
             }
         } else {
-            results.push({ filename, status: 'error', message: 'Không tìm thấy file' });
+            results.push({ input: input, status: 'error', message: 'Không tìm thấy file' });
             errorCount++;
         }
     }
