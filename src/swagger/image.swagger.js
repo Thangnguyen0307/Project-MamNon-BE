@@ -17,6 +17,14 @@ export const imageSwagger = {
                   default: 'blog',
                   description: 'Loại hình ảnh (blog hoặc avatar)'
                 },
+                classId: {
+                  type: 'string',
+                  description: 'ID của lớp học (bắt buộc khi type = blog)'
+                },
+                userId: {
+                  type: 'string', 
+                  description: 'ID của người dùng (bắt buộc khi type = avatar)'
+                },
                 images: {
                   type: 'array',
                   items: {

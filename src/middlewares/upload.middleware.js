@@ -2,25 +2,66 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { Class } from '../models/class.model.js';
+import { User } from '../models/user.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Storage configuration
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Get image type from request body or default to 'blog'
-        const imageType = req.body.type || 'blog';
-        const destinationPath = imageType === 'avatar' 
-            ? path.join(__dirname, '../../images/avatars')
-            : path.join(__dirname, '../../images/blogs');
-        
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(destinationPath)) {
-            fs.mkdirSync(destinationPath, { recursive: true });
+// Helper function to create directory structure
+const createDirectoryPath = async (req, imageType) => {
+    const baseUploadPath = path.join(__dirname, '../../uploadeds');
+    
+    if (imageType === 'avatar') {
+        const userId = req.body.userId;
+        if (!userId) {
+            throw new Error('userId is required for avatar upload');
         }
         
-        cb(null, destinationPath);
+        // Check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        const avatarPath = path.join(baseUploadPath, 'avatar', userId);
+        return avatarPath;
+    } else if (imageType === 'blog') {
+        const classId = req.body.classId;
+        if (!classId) {
+            throw new Error('classId is required for blog upload');
+        }
+        
+        // Get class information
+        const classInfo = await Class.findById(classId);
+        if (!classInfo) {
+            throw new Error('Class not found');
+        }
+        
+        const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate);
+        return blogPath;
+    }
+    
+    throw new Error('Invalid image type');
+};
+
+// Dynamic storage configuration
+const storage = multer.diskStorage({
+    destination: async function (req, file, cb) {
+        try {
+            const imageType = req.body.type || 'blog';
+            const destinationPath = await createDirectoryPath(req, imageType);
+            
+            // Create directory if it doesn't exist
+            if (!fs.existsSync(destinationPath)) {
+                fs.mkdirSync(destinationPath, { recursive: true });
+            }
+            
+            cb(null, destinationPath);
+        } catch (error) {
+            cb(error);
+        }
     },
     filename: function (req, file, cb) {
         // Generate unique filename: timestamp-originalname

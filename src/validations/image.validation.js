@@ -7,6 +7,26 @@ export const uploadImagesSchema = Joi.object({
     .messages({
       'any.only': 'Loại hình chỉ được phép là: blog hoặc avatar'
     }),
+  classId: Joi.when('type', {
+    is: 'blog',
+    then: Joi.string()
+      .required()
+      .messages({
+        'any.required': 'classId là bắt buộc khi upload hình cho blog',
+        'string.base': 'classId phải là chuỗi'
+      }),
+    otherwise: Joi.forbidden()
+  }),
+  userId: Joi.when('type', {
+    is: 'avatar',
+    then: Joi.string()
+      .required()
+      .messages({
+        'any.required': 'userId là bắt buộc khi upload avatar',
+        'string.base': 'userId phải là chuỗi'
+      }),
+    otherwise: Joi.forbidden()
+  }),
   images: Joi.array()
     .items(Joi.any())
     .min(1)

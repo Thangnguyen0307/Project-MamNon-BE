@@ -9,6 +9,39 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Helper function to find and delete image files in uploadeds directory
+const findAndDeleteImage = (imagePath) => {
+    const filename = path.basename(imagePath);
+    const uploadedsPath = path.join(__dirname, '../../uploadeds');
+    
+    const searchRecursively = (dir) => {
+        if (!fs.existsSync(dir)) return false;
+        
+        const items = fs.readdirSync(dir);
+        
+        for (const item of items) {
+            const fullPath = path.join(dir, item);
+            const stat = fs.statSync(fullPath);
+            
+            if (stat.isDirectory()) {
+                if (searchRecursively(fullPath)) return true;
+            } else if (item === filename) {
+                try {
+                    fs.unlinkSync(fullPath);
+                    console.log(`Deleted image: ${filename} from ${fullPath}`);
+                    return true;
+                } catch (error) {
+                    console.log('Error deleting image:', filename, error);
+                    return false;
+                }
+            }
+        }
+        return false;
+    };
+    
+    return searchRecursively(uploadedsPath);
+};
+
 export const blogService = {
     
     async create(blogData, authorId) {
@@ -198,22 +231,7 @@ export const blogService = {
         
         // Delete removed images from filesystem
         imagesToDelete.forEach(imagePath => {
-            const filename = path.basename(imagePath);
-            // Try both blogs and avatars folders
-            const blogPath = path.join(__dirname, '../../images/blogs', filename);
-            const avatarPath = path.join(__dirname, '../../images/avatars', filename);
-            
-            try {
-                if (fs.existsSync(blogPath)) {
-                    fs.unlinkSync(blogPath);
-                    console.log(`Deleted blog image: ${filename}`);
-                } else if (fs.existsSync(avatarPath)) {
-                    fs.unlinkSync(avatarPath);
-                    console.log(`Deleted avatar image: ${filename}`);
-                }
-            } catch (error) {
-                console.log('Error deleting image:', filename, error);
-            }
+            findAndDeleteImage(imagePath);
         });
 
         // Update blog with new image URLs
@@ -258,22 +276,7 @@ export const blogService = {
         // Delete all image files associated with this blog
         if (blog.images && blog.images.length > 0) {
             blog.images.forEach(imagePath => {
-                const filename = path.basename(imagePath);
-                // Try both blogs and avatars folders
-                const blogPath = path.join(__dirname, '../../images/blogs', filename);
-                const avatarPath = path.join(__dirname, '../../images/avatars', filename);
-                
-                try {
-                    if (fs.existsSync(blogPath)) {
-                        fs.unlinkSync(blogPath);
-                        console.log(`Deleted blog image: ${filename}`);
-                    } else if (fs.existsSync(avatarPath)) {
-                        fs.unlinkSync(avatarPath);
-                        console.log(`Deleted avatar image: ${filename}`);
-                    }
-                } catch (error) {
-                    console.log('Error deleting image:', filename, error);
-                }
+                findAndDeleteImage(imagePath);
             });
         }
 
