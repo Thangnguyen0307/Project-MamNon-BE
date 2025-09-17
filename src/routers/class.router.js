@@ -16,5 +16,6 @@ classRouter.get('/:id', classController.getClassById);
 classRouter.post('/', authenticate, authorize(ROLE.ADMIN), validate(createClassSchema), classController.createClass);
 classRouter.put('/:id', authenticate, authorize(ROLE.ADMIN), validate(updateClassSchema), classController.updateClass);
 classRouter.delete('/:id', authenticate, authorize(ROLE.ADMIN), classController.deleteClass);
+classRouter.get('/user/:id', authenticate, authorize(ROLE.ADMIN), classController.getClassesByUser);
 
 export default classRouter;

@@ -304,5 +304,26 @@ export const classSwagger = {
         500: { description: 'Lỗi server' }
       }
     }
+  },
+    '/api/classes/user/{id}': {
+  get: {
+    tags: ['Classes'],
+    summary: 'ADMIN: Lấy danh sách lớp mà một người dùng đang dạy',
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        in: 'path',
+        name: 'id',
+        required: true,
+        schema: { type: 'string', example: '68c3c432b180b339805cb5e5' },
+        description: 'ObjectId của user (teacher)'
+      }
+    ],
+    responses: {
+      200: { description: 'OK' },
+      401: { description: 'Không có quyền truy cập' },
+      500: { description: 'Lỗi server' }
+    }
   }
+},
 };
