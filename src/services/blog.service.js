@@ -2,7 +2,7 @@ import { Blog } from "../models/blog.model.js";
 import { Class } from "../models/class.model.js";
 import { User } from "../models/user.model.js";
 import { toBlogResponse } from "../mappers/blog.mapper.js";
-import { linkVideosToBlog } from './video.service.js';
+import { linkVideosToBlog, deleteVideoHard } from './video.service.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -240,11 +240,36 @@ export const blogService = {
             findAndDeleteImage(imagePath);
         });
 
-        // Update blog with new image URLs
+        // Prepare add/remove video operations
+        const hex24 = /^[0-9a-fA-F]{24}$/;
+        const normToIds = (v) => {
+            if (!v) return [];
+            if (Array.isArray(v)) return v.map(String);
+            if (typeof v === 'string') return v.split(',').map(s=>s.trim()).filter(Boolean);
+            return [String(v)];
+        };
+        const addVideoIds = Array.from(new Set(normToIds(updateData.addVideoIds).filter(id=>hex24.test(id))));
+        const removeVideoIds = Array.from(new Set(normToIds(updateData.removeVideoIds).filter(id=>hex24.test(id))));
+
+        // Hard delete videos being removed from this blog
+        if (removeVideoIds.length){
+            try {
+                for (const vId of removeVideoIds){
+                    await deleteVideoHard(vId);
+                }
+                // Ensure blog.videos is clean (in case any refs remain)
+                await Blog.findByIdAndUpdate(id, { $pull: { videos: { $in: removeVideoIds } } });
+            } catch (e){
+                console.log('Remove videos (hard delete) failed:', e.message);
+            }
+        }
+
+        // Update blog fields (excluding add/remove controls)
+        const { addVideoIds: _a, removeVideoIds: _r, existingImages: _e, ...restUpdate } = updateData;
         const updatedBlog = await Blog.findByIdAndUpdate(
             id,
             {
-                ...updateData,
+                ...restUpdate,
                 images: newImages
             },
             { new: true }
@@ -262,6 +287,14 @@ export const blogService = {
                 }
             }
         ]);
+        // Add new videos (linkVideosToBlog will also handle ready/not-ready cases and relocate paths)
+        if (addVideoIds.length){
+            try {
+                await linkVideosToBlog(addVideoIds, updatedBlog._id);
+            } catch (e){
+                console.log('Add videos failed:', e.message);
+            }
+        }
         return toBlogResponse(updatedBlog);
     },
 
@@ -284,6 +317,13 @@ export const blogService = {
             blog.images.forEach(imagePath => {
                 findAndDeleteImage(imagePath);
             });
+        }
+
+        // Hard delete all videos associated with this blog
+        if (blog.videos && blog.videos.length > 0){
+            for (const vId of blog.videos){
+                try { await deleteVideoHard(vId); } catch {}
+            }
         }
 
         await Blog.findByIdAndDelete(id);

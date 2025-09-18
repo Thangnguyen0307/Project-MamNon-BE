@@ -67,6 +67,15 @@ export const updateBlogSchema = Joi.object({
         Joi.array().items(Joi.string()),
         Joi.string()
     ).optional() // Allow existingImages as array or single string
+    ,
+    addVideoIds: Joi.alternatives().try(
+        Joi.array().items(Joi.string()),
+        Joi.string()
+    ).optional(),
+    removeVideoIds: Joi.alternatives().try(
+        Joi.array().items(Joi.string()),
+        Joi.string()
+    ).optional()
 });
 
 export const getBlogsQuerySchema = Joi.object({

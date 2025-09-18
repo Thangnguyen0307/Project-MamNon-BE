@@ -237,6 +237,7 @@ export const blogSwagger = {
       tags: ['Blogs'],
       summary: 'Cập nhật bài viết',
       security: [{ bearerAuth: [] }],
+      description: 'Lưu ý: Ảnh bị loại khỏi danh sách sẽ bị xóa vĩnh viễn trên ổ đĩa. Nếu gửi removeVideoIds, các video này cũng sẽ bị xóa vĩnh viễn (asset HLS + document).',
       parameters: [
         {
           in: 'path',
@@ -268,6 +269,20 @@ export const blogSwagger = {
                   type: 'array',
                   items: { type: 'string' },
                   description: 'Danh sách URL hình ảnh hiện tại muốn giữ lại'
+                },
+                addVideoIds: {
+                  oneOf: [
+                    { type: 'array', items: { type: 'string', pattern: '^[0-9a-fA-F]{24}$' } },
+                    { type: 'string', description: 'Có thể truyền CSV: id1,id2' }
+                  ],
+                  description: 'Danh sách videoId muốn thêm vào bài viết. Video đã sẵn sàng sẽ gắn ngay; chưa sẵn sàng sẽ tự gắn sau.'
+                },
+                removeVideoIds: {
+                  oneOf: [
+                    { type: 'array', items: { type: 'string', pattern: '^[0-9a-fA-F]{24}$' } },
+                    { type: 'string', description: 'Có thể truyền CSV: id1,id2' }
+                  ],
+                  description: 'Danh sách videoId muốn gỡ bỏ. Lưu ý: các video này sẽ bị xóa vĩnh viễn (hard delete).'
                 }
               }
             }
@@ -300,6 +315,7 @@ export const blogSwagger = {
     delete: {
       tags: ['Blogs'],
       summary: 'Xóa bài viết',
+      description: 'Lưu ý: Xóa bài viết sẽ xóa vĩnh viễn tất cả ảnh và video (asset HLS + document) thuộc bài viết.',
       security: [{ bearerAuth: [] }],
       parameters: [
         {

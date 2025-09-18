@@ -45,8 +45,13 @@ async function resolveStructuredBaseDir(video){
 async function getCurrentChunkBaseDir(video){
   const structuredBase = await resolveStructuredBaseDir(video);
   const hasChunks = (dir) => fs.existsSync(dir) && fs.readdirSync(dir).some(f=>f.startsWith('chunk_'));
+  // If chunks already exist in structured path, continue there
   if (hasChunks(structuredBase)) return structuredBase;
-  return structuredBase; // start writing here (no separate unlinked dir)
+  // If video was linked mid-upload, previous chunks may be in the unlinked path; prefer existing dir to avoid splitting
+  const unlinkedBase = await resolveStructuredBaseDir({ _id: video._id, createdAt: video.createdAt, blog: null });
+  if (hasChunks(unlinkedBase)) return unlinkedBase;
+  // Default: start writing to the structured path
+  return structuredBase;
 }
 
 function runFfmpeg(args, label){
@@ -164,7 +169,8 @@ registerProcessor(async (job) => {
     try { console.log('[Worker] Processing done, status ready', { videoId: String(videoId), m3u8: doc.m3u8 }); } catch {}
   try { emitVideoEvent(videoId, 'ready', { videoId: String(videoId), m3u8: doc.m3u8, thumbnail: doc.thumbnail, status: 'ready' }); } catch {}
       if (doc.blog) {
-        await Blog.findByIdAndUpdate(doc.blog, { $addToSet: { videos: doc._id } });
+        // Ensure blog has reference and relocate assets into structured folder if they were under 'unlinked'
+        try { await linkVideosToBlog([String(videoId)], doc.blog); } catch (e) { try { console.log('Relocate after ready failed:', e.message); } catch {} }
       }
       // Chain next step: upload HLS to S3 (optional)
       try { await addVideoUploadS3Job({ videoId: String(videoId) }); } catch {}
@@ -254,3 +260,59 @@ export async function linkVideosToBlog(videoIds, blogId){
 }
 
 // getVideoStatus removed: status/retry endpoints are no longer used
+
+// Hard delete a video: remove its asset directory (HLS/chunks) and DB document, and unlink from Blog
+export async function deleteVideoHard(videoIdOrDoc){
+  try {
+    const v = (videoIdOrDoc && videoIdOrDoc._id) ? videoIdOrDoc : await Video.findById(videoIdOrDoc);
+    if (!v) return { deleted: false, reason: 'not-found' };
+
+    const cwd = process.cwd();
+    const uploadedsRoot = path.join(cwd, 'uploadeds');
+    const candidateDirs = new Set();
+
+    // If m3u8 exists, derive directory from it
+    if (v.m3u8) {
+      const m3u8Rel = v.m3u8.startsWith('/') ? v.m3u8.slice(1) : v.m3u8;
+      const m3u8Abs = path.join(cwd, m3u8Rel);
+      candidateDirs.add(path.dirname(m3u8Abs));
+    }
+
+    // Also consider the structured base dir for this video
+    try {
+      const baseRel = await resolveStructuredBaseDir(v);
+      const baseAbs = path.join(cwd, baseRel);
+      candidateDirs.add(baseAbs);
+    } catch {}
+
+    // Always consider the unlinked base dir as well, in case chunks were written before linking to a blog
+    try {
+      const unlinkedRel = await resolveStructuredBaseDir({ _id: v._id, createdAt: v.createdAt, blog: null });
+      const unlinkedAbs = path.join(cwd, unlinkedRel);
+      candidateDirs.add(unlinkedAbs);
+    } catch {}
+
+    // Remove candidate directories safely (must be inside uploadeds)
+    for (const dir of candidateDirs) {
+      try {
+        if (dir && fs.existsSync(dir)) {
+          const isUnderUploadeds = path.resolve(dir).startsWith(path.resolve(uploadedsRoot));
+          if (isUnderUploadeds) {
+            // Delete the whole folder for this videoId
+            fs.rmSync(dir, { recursive: true, force: true });
+          }
+        }
+      } catch {}
+    }
+
+    // Remove DB doc and unlink from blog if needed
+    const vidId = v._id;
+    if (v.blog) {
+      try { await Blog.findByIdAndUpdate(v.blog, { $pull: { videos: vidId } }); } catch {}
+    }
+    await Video.deleteOne({ _id: vidId });
+    return { deleted: true };
+  } catch (e) {
+    return { deleted: false, reason: e.message };
+  }
+}
