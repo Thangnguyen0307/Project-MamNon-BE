@@ -15,6 +15,10 @@ export const env = {
     CORS_ORIGIN: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
     : ['*'],
+    // Queue configs
+    QUEUE_BACKEND: process.env.QUEUE_BACKEND,
+    RABBITMQ_URL: process.env.RABBITMQ_URL,
+    START_QUEUE_CONSUMER: process.env.START_QUEUE_CONSUMER,
     ZALO_APP_ID: process.env.ZALO_APP_ID,
     ZALO_SECRET_KEY: process.env.ZALO_SECRET_KEY,
     ZALO_CALLBACK_URL: process.env.ZALO_CALLBACK_URL,

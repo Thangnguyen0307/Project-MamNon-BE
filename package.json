@@ -7,7 +7,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch src/app.js",
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "worker:video": "node src/workers/video.queue.worker.js",
+    "mq:ensure": "docker start rabbitmq || docker run --name rabbitmq -d -p 5672:5672 -p 15672:15672 rabbitmq:3-management",
+    "mq:down": "docker rm -f rabbitmq",
+    "dev:api:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node --watch src/app.js",
+    "dev:worker:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node src/workers/video.queue.worker.js",
+    "dev:all": "npm run mq:ensure && concurrently -n API,WORKER -c green,magenta \"npm:dev:api:rabbit\" \"npm:dev:worker:rabbit\"",
+    "dev:rabbit:all": "npm run dev:all"
   },
   "repository": {
     "type": "git",
@@ -22,10 +29,14 @@
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
     "axios": "^1.12.2",
+    "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
+    "concurrently": "^9.0.1",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "ffmpeg-static": "^5.2.0",
     "fs-extra": "^11.3.1",
     "handlebars": "^4.7.8",
     "joi": "^18.0.1",
@@ -34,7 +45,9 @@
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
+    "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
-    "ua-parser-js": "^2.0.5"
+    "ua-parser-js": "^2.0.5",
+    "wait-on": "^8.0.2"
   }
 }

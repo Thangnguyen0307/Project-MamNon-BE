@@ -7,6 +7,8 @@ import levelRouter from './level.router.js';
 import adminRouter from './adminRouter.js';
 import blogRouter from './blog.router.js';
 import webhookZaloRouter from './web-hook-zaloOARouter.js';
+import imageRouter from './image.router.js';
+import videoRouter from './video.router.js';
 
 const rootRouter = express.Router();
 
@@ -21,4 +23,6 @@ rootRouter.use('/admins', adminRouter);
 rootRouter.use('/zalo', webhookZaloRouter);
 rootRouter.use('/user', userRouter);
 rootRouter.use('/blogs', blogRouter);
+rootRouter.use('/images', imageRouter);
+rootRouter.use('/videos', videoRouter);
 export default rootRouter;

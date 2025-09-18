@@ -6,6 +6,9 @@ import BlogSchema from '../schemas/blog.schema.js';
 import { classSwagger } from './class.swagger.js';
 import { levelSwagger } from './level.swagger.js';
 import { blogSwagger } from './blog.swagger.js';
+import { imageSwagger } from './image.swagger.js';
+import { videoSwagger } from './video.swagger.js';
+import VideoSchema from '../schemas/video.schema.js';
 import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 import AdminSchema from '../schemas/admin.schema.js';
@@ -24,11 +27,16 @@ const swaggerDocument = {
             url: '/projects/mam-non-media',     // Prod qua Nginx
             description: 'Production - Techleaf',
         },
+        {
+            url: 'https://bfc003addee1.ngrok-free.app',       // Dev local
+            description: 'Local Development',
+        },
     ],
     paths: {
         ///------------------- API USER
         ...userPaths,
         //------------------- API AUTH
+        ...imageSwagger,
         '/api/auth/login': {
             post: {
                 tags: ['Auths'],
@@ -246,7 +254,8 @@ const swaggerDocument = {
 
         ...classSwagger,
         ...levelSwagger,
-        ...blogSwagger
+        ...blogSwagger,
+        ...videoSwagger
     },
     components: {
         schemas: {
@@ -254,6 +263,7 @@ const swaggerDocument = {
             ...LevelSchema,
             ...ClassSchema,
             ...BlogSchema,
+            ...VideoSchema,
             ...UserSchema,
         },
         securitySchemes: {

@@ -122,16 +122,32 @@ export const blogSwagger = {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                images: { 
+                images: {
                   type: 'array',
                   items: {
                     type: 'string',
                     format: 'binary'
                   },
                   description: 'Các file ảnh (tối đa 10 ảnh)'
+                },
+                videoIds: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Danh sách videoId đã upload (init + chunk) để gắn vào bài viết. Video chưa xử lý sẽ tự cập nhật sau.'
                 }
               },
               required: ['title', 'content', 'class']
+            },
+            examples: {
+              basic: {
+                summary: 'Tạo blog kèm 2 video đang xử lý',
+                value: {
+                  title: 'Hoạt động ngoài trời tuần 1',
+                  content: 'Các bé tham gia trồng cây và chơi vận động...',
+                  class: '66f0c2c9e8e4c2f9f0b12345',
+                  videoIds: ['vid_1726465123456', 'vid_1726465789000']
+                }
+              }
             }
           }
         }
@@ -240,10 +256,18 @@ export const blogSwagger = {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                image: { 
-                  type: 'string', 
-                  format: 'binary',
-                  description: 'File ảnh mới (tùy chọn)'
+                images: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'File hình ảnh mới để upload (sẽ thêm vào danh sách hiện tại)'
+                },
+                existingImages: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Danh sách URL hình ảnh hiện tại muốn giữ lại'
                 }
               }
             }
@@ -308,5 +332,6 @@ export const blogSwagger = {
         500: { description: 'Lỗi server' }
       }
     }
-  }
+  },
+  
 };
