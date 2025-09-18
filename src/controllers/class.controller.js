@@ -76,3 +76,22 @@ export const deleteClass = async (req, res) => {
     return res.status(error.status || 500).json({ success: false, message: error.message || "L?i server" });
   }
 };
+
+export const getMyClasses  = async (req, res) => {
+  try{
+    const teacherId = req.payload.userId;
+     
+    const classes = await classService.getByUserId(teacherId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Lấy danh sách lớp của giáo viên thành công",
+      data: classes
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Lỗi server"
+    });
+  }
+};

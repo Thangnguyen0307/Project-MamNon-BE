@@ -162,5 +162,13 @@ export const classService = {
             .sort({ schoolYear: -1, name: 1 });
             
         return classes.map(toClassResponse);
+    },
+    
+    async getByUserId(id){
+        const classes = await Class.find({teachers: id})
+            .populate('level teachers')
+            .sort({ createdAt: -1});
+
+        return classes.map(toClassResponse);
     }
 };
