@@ -1,4 +1,4 @@
-import { ZaloToken } from "../models/zalo-token.model.js";
+import { ZaloToken } from "../../models/zalo-token.model.js";
 
 export async function saveZaloToken(oaId, accessToken, refreshToken, expiresIn) {
     const expiresAt = new Date(Date.now() + expiresIn * 1000);

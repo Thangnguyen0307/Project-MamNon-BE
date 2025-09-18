@@ -1,7 +1,7 @@
 import express from 'express';
 import { WebhookController } from '../controllers/webhook-zaloOA.controller.js';
 import { generatePKCECodes } from '../utils/crypto.util.js';
-import { saveOAuthSession } from '../services/zaloOA.service.js';
+import { saveOAuthSession } from '../services/zalo/zaloOA.service.js';
 
 const webhookZaloRouter = express.Router();
 

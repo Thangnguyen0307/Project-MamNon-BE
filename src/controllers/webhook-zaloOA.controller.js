@@ -1,8 +1,11 @@
 import axios from 'axios';
 import qs from 'qs';
 import { env } from '../config/environment.js';
-import { getVerifierByState } from '../services/zaloOA.service.js';
-import { saveZaloToken } from '../services/zaloToken.service.js';
+import { saveZaloToken } from '../services/zalo/zaloToken.service.js';
+import { getVerifierByState } from '../services/zalo/zaloOA.service.js';
+import { conversationService } from '../services/zalo/conversation.service.js';
+import { messageService } from '../services/zalo/message.service.js';
+import { SENDER } from '../constants/sender.constant.js';
 
 export const WebhookController = {
     async handleEnvent(req, res) {
@@ -12,12 +15,31 @@ export const WebhookController = {
 
             // TODO: lưu DB
             // ví dụ: nếu là tin nhắn từ user
-            if (event.message && event.sender) {
-                const userId = event.sender.id;
-                const text = event.message.text;
-                console.log(`User ${userId} said: ${text}`);
-            }
+            switch (event.event_name) {
 
+                case "user_send_text":
+                    console.log("Received a text message sent by customer");
+                    const userId = event.sender.id;
+                    const recipientId = event.recipient.id;
+                    const text = event.message.text;
+
+                    console.log(`User ID: ${userId}`);
+                    console.log(`Recipient ID: ${recipientId}`);
+                    console.log(`Message Text: ${text}`);
+
+                    // Xử lý tin nhắn ở đây (ví dụ: lưu vào DB, gửi phản hồi, v.v.)
+                    const coversation = await conversationService.createConversation(userId, recipientId);
+                    await messageService.saveMessage(coversation.conversation_id, SENDER.USER, userId, text);
+                    // socket emit sự kiện có tin nhắn mới
+
+                    break;
+
+                case "oa_send_text":
+                    console.log("Received a text message sent by OA");
+                    break;
+                default:
+                    console.log(`Unhandled event type: ${event.event_name}`);
+            }
             res.sendStatus(200);
         } catch (err) {
             console.error("Webhook error:", err);
