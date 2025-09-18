@@ -1,9 +1,12 @@
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// ========== Image Upload ========== //
 
 // Storage configuration
 const storage = multer.diskStorage({
@@ -138,3 +141,31 @@ export const handleMulterError = (error, req, res, next) => {
     
     next(error);
 };
+
+// ========== Video Upload (single) =========
+const videoStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    const dir = path.join(__dirname, '../../uploads/temp/videos');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: function(req, file, cb) {
+    const unique = Date.now() + '-' + Math.round(Math.random()*1e9);
+    cb(null, 'video-' + unique + path.extname(file.originalname || '.mp4'));
+  }
+});
+
+const videoFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('video/')) return cb(null, true);
+  cb(new Error('Chỉ chấp nhận file video'), false);
+};
+
+export const uploadSingleBlogVideo = multer({
+  storage: videoStorage,
+  fileFilter: videoFilter,
+  limits: { fileSize: 300 * 1024 * 1024 }
+}).single('video');
+
+// ========== Chunk Upload (memory) =========
+const chunkMemory = multer({ storage: multer.memoryStorage() });
+export const uploadVideoChunk = chunkMemory.any();
