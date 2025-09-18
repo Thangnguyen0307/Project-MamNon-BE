@@ -305,25 +305,62 @@ export const classSwagger = {
       }
     }
   },
-    '/api/classes/user/{id}': {
-  get: {
-    tags: ['Classes'],
-    summary: 'ADMIN: Lấy danh sách lớp mà một người dùng đang dạy',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      {
-        in: 'path',
-        name: 'id',
-        required: true,
-        schema: { type: 'string', example: '68c3c432b180b339805cb5e5' },
-        description: 'ObjectId của user (teacher)'
+  '/api/classes/user': {
+    get: {
+      tags: ['Classes'],
+      summary: 'Lấy danh sách lớp của Teacher (id lấy từ token)',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Lấy danh sách lớp thành công',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: true },
+                  message: { type: 'string', example: 'Lấy danh sách lớp của giáo viên thành công' },
+                  data: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string', example: 'Mầm 1' },
+                        schoolYear: { type: 'string', example: '2025-2026' },
+                        level: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string', example: 'Mầm' }
+                          }
+                        },
+                        teachers: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'string' },
+                              fullName: { type: 'string' },
+                              email: { type: 'string' },
+                              role: { type: 'string', example: 'TEACHER' }
+                            }
+                          }
+                        },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        401: { description: 'Chưa đăng nhập' },
+        403: { description: 'Không có quyền (chỉ TEACHER)' },
+        500: { description: 'Lỗi server' }
       }
-    ],
-    responses: {
-      200: { description: 'OK' },
-      401: { description: 'Không có quyền truy cập' },
-      500: { description: 'Lỗi server' }
     }
-  }
-},
+  },
 };
