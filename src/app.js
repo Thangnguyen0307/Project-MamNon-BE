@@ -12,6 +12,7 @@ import userRouter from './routers/userRouter.js';
 import path from "path";
 import fs from 'fs';
 import { initSocket } from './realtime/socket.js';
+import { startRabbitConsumer } from './queues/videoqueue.consumer.js';
 
 
 const app = express();
@@ -90,9 +91,15 @@ server.listen(PORT, () => {
     console.log('========================================================\n');
 });
 
+// Kết nối tới MongoDB
+await connectToMongo();
+
+// Khởi động RabbitMQ consumer (tương tự như trong worker)
+await startRabbitConsumer();
+
 seedAdminUser();
 seedLevels();
-connectToMongo();
+
 app.use('/api-docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 app.use('/api', rootRouter);

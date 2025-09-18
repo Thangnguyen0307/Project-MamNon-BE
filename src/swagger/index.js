@@ -27,6 +27,10 @@ const swaggerDocument = {
             url: '/projects/mam-non-media',     // Prod qua Nginx
             description: 'Production - Techleaf',
         },
+        {
+            url: 'https://bfc003addee1.ngrok-free.app',       // Dev local
+            description: 'Local Development',
+        },
     ],
     paths: {
         ///------------------- API USER
