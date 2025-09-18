@@ -23,8 +23,6 @@ export const classSwagger = {
           name: 'teacher',
           schema: { type: 'string' },
           description: 'Lọc theo giáo viên ID'
-<<<<<<< Updated upstream
-=======
         },
         {
           in: 'query',
@@ -37,7 +35,6 @@ export const classSwagger = {
           name: 'limit',
           schema: { type: 'integer', default: 10 },
           description: 'Số lượng item mỗi trang (mặc định = 10)'
->>>>>>> Stashed changes
         }
       ],
       responses: {
