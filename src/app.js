@@ -40,36 +40,15 @@ app.use(cors({
     credentials: true // nếu cần cookie, token
 }));
 app.use(express.static('.'))
-app.use(cors());
 app.use('/api/user', userRouter);
 
-// Serve HLS video assets with correct MIME types (regex form to avoid path-to-regexp wildcard error)
-app.get(/^\/videos\/(.*)/, (req, res) => {
-    const relative = req.params[0]; // part after /videos/
-    if (!relative) return res.status(400).json({ success: false, message: 'Missing video path' });
-    const filePath = path.join(process.cwd(), 'videos', relative);
-    if (!fs.existsSync(filePath)) return res.status(404).end();
+// Removed legacy /videos static route; HLS is served from /uploadeds/**
 
-    if (filePath.endsWith('.m3u8')) {
-        res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-    } else if (filePath.endsWith('.ts')) {
-        res.setHeader('Content-Type', 'video/mp2t');
-    } else if (/(\.jpe?g)$/i.test(filePath)) {
-        res.setHeader('Content-Type', 'image/jpeg');
-    } else if (/\.png$/i.test(filePath)) {
-        res.setHeader('Content-Type', 'image/png');
-    }
-    if (/\.(ts|m3u8)$/.test(filePath)) {
-        res.setHeader('Cache-Control', 'public, max-age=60');
-    }
-    fs.createReadStream(filePath).pipe(res);
-});
-
-// Serve new storage root 'uploaded' with correct MIME and caching
-app.get(/^\/uploaded\/(.*)/, (req, res) => {
+// Serve new storage root 'uploadeds' with correct MIME and caching
+app.get(/^\/uploadeds\/(.*)/, (req, res) => {
     const relative = req.params[0];
     if (!relative) return res.status(400).json({ success: false, message: 'Missing path' });
-    const filePath = path.join(process.cwd(), 'uploaded', relative);
+    const filePath = path.join(process.cwd(), 'uploadeds', relative);
     if (!fs.existsSync(filePath)) return res.status(404).end();
 
     if (filePath.endsWith('.m3u8')) {

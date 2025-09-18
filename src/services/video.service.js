@@ -23,7 +23,7 @@ function safeSegment(s){
 }
 
 async function resolveStructuredBaseDir(video){
-  // Desired: uploaded/video/<schoolYear>/<className>/<YYYY-MM-DD>/<videoId>
+  // Desired: uploadeds/<schoolYear>/<className>/<YYYY-MM-DD>/video/<videoId>
   const idStr = String(video._id);
   const created = video.createdAt ? new Date(video.createdAt) : new Date();
   const dateSeg = created.toISOString().slice(0,10); // YYYY-MM-DD
@@ -33,12 +33,12 @@ async function resolveStructuredBaseDir(video){
       if (blog && blog.class){
         const schoolYear = blog.class.schoolYear || 'unknown-year';
         const className = blog.class.name || 'unknown-class';
-  return path.join('uploaded','video', safeSegment(schoolYear), safeSegment(className), dateSeg, idStr);
+  return path.join('uploadeds', safeSegment(schoolYear), safeSegment(className), dateSeg, 'video', idStr);
       }
     }
   } catch {}
   // Fallback for unlinked videos
-  return path.join('uploaded','video','unlinked', dateSeg, idStr);
+  return path.join('uploadeds','unlinked', dateSeg, 'video', idStr);
 }
 
 async function getCurrentChunkBaseDir(video){
@@ -252,8 +252,4 @@ export async function linkVideosToBlog(videoIds, blogId){
   }
 }
 
-export async function getVideoStatus(videoId){
-  const v = await Video.findById(videoId).lean();
-  if (!v) throw new Error('Video not found');
-  return v;
-}
+// getVideoStatus removed: status/retry endpoints are no longer used
