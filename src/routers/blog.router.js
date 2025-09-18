@@ -18,6 +18,5 @@ blogRouter.get('/:id', blogController.getBlogById);
 blogRouter.post('/', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), validateBlogRequest(createBlogSchema), uploadBlogImages, validateAfterUpload(createBlogSchema), handleMulterError, blogController.createBlog);
 blogRouter.put('/:id', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), validateBlogRequest(updateBlogSchema), uploadBlogImages, validateAfterUpload(updateBlogSchema), handleMulterError, blogController.updateBlog);
 blogRouter.delete('/:id', authenticate, authorize([ROLE.ADMIN, ROLE.TEACHER]), blogController.deleteBlog);
-// Legacy blog video upload endpoints removed; use /api/videos/* endpoints instead
 
 export default blogRouter;

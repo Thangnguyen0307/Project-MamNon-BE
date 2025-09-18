@@ -4,7 +4,6 @@ const blogSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
     images: [{ type: String }], // Array of image paths
-    // Tham chiếu tới các video (ref: 'Video')
     videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', required: true },

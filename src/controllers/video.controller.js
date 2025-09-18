@@ -26,5 +26,3 @@ export const uploadVideoChunkGeneric = async (req, res) => {
     return res.status(500).json({ success:false, message: e.message });
   }
 };
-
-// Removed getStatus and retryProcessing per user's request

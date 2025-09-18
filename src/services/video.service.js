@@ -197,8 +197,15 @@ export async function finalizeIfDone(videoId){
 }
 
 export async function linkVideosToBlog(videoIds, blogId){
-  if (!videoIds || !videoIds.length) return;
-  const videos = await Video.find({ _id: { $in: videoIds } });
+  const hex24 = /^[0-9a-fA-F]{24}$/;
+  let ids = [];
+  if (!videoIds) return;
+  if (Array.isArray(videoIds)) ids = videoIds;
+  else if (typeof videoIds === 'string') ids = videoIds.split(',').map(s=>s.trim()).filter(Boolean);
+  else ids = [String(videoIds)];
+  ids = Array.from(new Set(ids.filter(id => hex24.test(id))));
+  if (!ids.length) return;
+  const videos = await Video.find({ _id: { $in: ids } });
   for (const v of videos){
     if (!v.blog) v.blog = blogId;
     if (v.status === 'ready'){

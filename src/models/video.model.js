@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 
 // Video lifecycle separate from Blog to allow asynchronous processing (Level 2 UX)
 const videoSchema = new mongoose.Schema({
-  // _id sẽ là ObjectId tự sinh như các model khác (User, Class, ...)
   originalName: { type: String },
   blog: { type: mongoose.Schema.Types.ObjectId, ref: 'Blog', default: null },
   status: { type: String, enum: ['uploading', 'uploaded', 'processing', 'ready', 'failed'], default: 'uploading' },// new- dua id ve frontend, sau do uptung chunnk vo id

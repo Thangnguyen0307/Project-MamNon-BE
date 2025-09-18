@@ -149,11 +149,29 @@ export const blogService = {
         // Process image paths
         const imagePaths = imageFiles ? imageFiles.map(file => `/images/blogs/${file.filename}`) : [];
 
-        // Extract and normalize videoIds (can be string or array)
+        // Extract and normalize videoIds (can be string, CSV string, or array)
+        const hex24 = /^[0-9a-fA-F]{24}$/;
         let videoIds = [];
         if (blogData.videoIds) {
-            if (Array.isArray(blogData.videoIds)) videoIds = blogData.videoIds;
-            else videoIds = [blogData.videoIds];
+            if (Array.isArray(blogData.videoIds)) {
+                videoIds = blogData.videoIds;
+            } else if (typeof blogData.videoIds === 'string') {
+                // Support CSV like "id1,id2" or with spaces
+                videoIds = blogData.videoIds
+                  .split(',')
+                  .map(s => s.trim())
+                  .filter(Boolean);
+            } else {
+                videoIds = [String(blogData.videoIds)];
+            }
+        }
+        // Filter invalid ids and de-duplicate
+        const beforeCount = videoIds.length;
+        videoIds = Array.from(new Set(videoIds.filter(id => hex24.test(id))));
+        if (beforeCount && videoIds.length === 0) {
+            console.log('Link videoIds skipped: all provided IDs invalid format');
+        } else if (videoIds.length < beforeCount) {
+            console.log(`Link videoIds: filtered ${beforeCount - videoIds.length} invalid IDs`);
         }
 
         const { videoIds: _omitVideoIds, ...rest } = blogData; // avoid storing raw videoIds field

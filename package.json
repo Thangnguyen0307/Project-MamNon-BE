@@ -11,9 +11,9 @@
     "worker:video": "node src/workers/video.queue.worker.js",
     "mq:ensure": "docker start rabbitmq || docker run --name rabbitmq -d -p 5672:5672 -p 15672:15672 rabbitmq:3-management",
     "mq:down": "docker rm -f rabbitmq",
-  "dev:api:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node --watch src/app.js",
-  "dev:worker:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node src/workers/video.queue.worker.js",
-  "dev:all": "npm run mq:ensure && concurrently -n API,WORKER -c green,magenta \"npm:dev:api:rabbit\" \"npm:dev:worker:rabbit\"",
+    "dev:api:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node --watch src/app.js",
+    "dev:worker:rabbit": "cross-env NODE_ENV=production QUEUE_BACKEND=rabbitmq RABBITMQ_URL=amqp://admin:admin123@localhost:5672 wait-on tcp:5672 && node src/workers/video.queue.worker.js",
+    "dev:all": "npm run mq:ensure && concurrently -n API,WORKER -c green,magenta \"npm:dev:api:rabbit\" \"npm:dev:worker:rabbit\"",
     "dev:rabbit:all": "npm run dev:all"
   },
   "repository": {
@@ -44,10 +44,9 @@
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
+    "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
     "ua-parser-js": "^2.0.5",
-    "wait-on": "^8.0.2",
-    "socket.io": "^4.7.5"
+    "wait-on": "^8.0.2"
   }
 }
-
