@@ -10,7 +10,7 @@ import {
 } from '../validations/class.validation.js';
 
 const classRouter = express.Router();
-classRouter.get('/user', authenticate, authorize(ROLE.TEACHER), classController.getMyClasses);
+classRouter.get('/user', authenticate, authorize(ROLE.TEACHER), validate(getClassesQuerySchema, 'query'), classController.getMyClasses);
 classRouter.get('/', validate(getClassesQuerySchema, 'query'), classController.getAllClasses);
 classRouter.get('/:id', classController.getClassById);
 classRouter.post('/', authenticate, authorize(ROLE.ADMIN), validate(createClassSchema), classController.createClass);
