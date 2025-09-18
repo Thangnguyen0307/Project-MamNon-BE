@@ -122,13 +122,13 @@ export const blogSwagger = {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                images: { 
+                images: {
                   type: 'array',
                   items: {
                     type: 'string',
                     format: 'binary'
                   },
-                  description: 'Các file ảnh (tối đa 10 ảnh)'
+                  description: 'File hình ảnh để upload (tối đa 10 file)'
                 }
               },
               required: ['title', 'content', 'class']
@@ -240,10 +240,18 @@ export const blogSwagger = {
                 title: { type: 'string', description: 'Tiêu đề bài viết' },
                 content: { type: 'string', description: 'Nội dung bài viết' },
                 class: { type: 'string', description: 'ID lớp học' },
-                image: { 
-                  type: 'string', 
-                  format: 'binary',
-                  description: 'File ảnh mới (tùy chọn)'
+                images: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'File hình ảnh mới để upload (sẽ thêm vào danh sách hiện tại)'
+                },
+                existingImages: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Danh sách URL hình ảnh hiện tại muốn giữ lại'
                 }
               }
             }

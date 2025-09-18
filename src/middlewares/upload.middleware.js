@@ -1,19 +1,73 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { Class } from '../models/class.model.js';
+import { User } from '../models/user.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Storage configuration
+// Helper function to create directory structure
+const createDirectoryPath = async (req, imageType) => {
+    const baseUploadPath = path.join(__dirname, '../../uploadeds');
+    
+    if (imageType === 'avatar') {
+        const userId = req.body.userId;
+        if (!userId) {
+            throw new Error('userId is required for avatar upload');
+        }
+        
+        // Check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        const avatarPath = path.join(baseUploadPath, 'avatar', userId);
+        return avatarPath;
+    } else {
+        // For blog uploads (from blog API or image API with type=blog)
+        const classId = req.body.classId || req.body.class;
+        if (!classId) {
+            throw new Error('classId or class is required for blog upload');
+        }
+        
+        // Get class information
+        const classInfo = await Class.findById(classId);
+        if (!classInfo) {
+            throw new Error('Class not found');
+        }
+        
+        const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate, 'image');
+        return blogPath;
+    }
+};
+
+// Dynamic storage configuration
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../../images/blogs'));
+    destination: async function (req, file, cb) {
+        try {
+            const imageType = req.body.type || 'blog';
+            const destinationPath = await createDirectoryPath(req, imageType);
+            
+            // Create directory if it doesn't exist
+            if (!fs.existsSync(destinationPath)) {
+                fs.mkdirSync(destinationPath, { recursive: true });
+            }
+            
+            cb(null, destinationPath);
+        } catch (error) {
+            cb(error);
+        }
     },
     filename: function (req, file, cb) {
         // Generate unique filename: timestamp-originalname
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+        const imageType = req.body.type || 'blog';
+        const prefix = imageType === 'avatar' ? 'avatar-' : 'blog-';
+        cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
@@ -43,9 +97,8 @@ export const uploadBlogImages = (req, res, next) => {
         return next();
     }
     
-    // Support both 'image' (single) and 'images' (multiple) fields
+    // Only support 'images' field for multiple files
     const fields = [
-        { name: 'image', maxCount: 1 },
         { name: 'images', maxCount: 10 }
     ];
     
@@ -56,13 +109,8 @@ export const uploadBlogImages = (req, res, next) => {
         
         // Normalize files to req.files array for consistent processing
         let files = [];
-        if (req.files) {
-            if (req.files.image) {
-                files = files.concat(req.files.image);
-            }
-            if (req.files.images) {
-                files = files.concat(req.files.images);
-            }
+        if (req.files && req.files.images) {
+            files = req.files.images;
         }
         
         // Set normalized files array
