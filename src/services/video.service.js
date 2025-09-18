@@ -33,7 +33,8 @@ async function resolveStructuredBaseDir(video){
       if (blog && blog.class){
         const schoolYear = blog.class.schoolYear || 'unknown-year';
         const className = blog.class.name || 'unknown-class';
-  return path.join('uploadeds', safeSegment(schoolYear), safeSegment(className), dateSeg, 'video', idStr);
+  // Use raw values (allow Unicode) to align with image upload structure
+  return path.join('uploadeds', String(schoolYear), String(className), dateSeg, 'video', idStr);
       }
     }
   } catch {}
