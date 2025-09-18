@@ -23,6 +23,21 @@ export const classSwagger = {
           name: 'teacher',
           schema: { type: 'string' },
           description: 'Lọc theo giáo viên ID'
+<<<<<<< Updated upstream
+=======
+        },
+        {
+          in: 'query',
+          name: 'page',
+          schema: { type: 'integer', default: 1 },
+          description: 'Trang hiện tại (mặc định = 1)'
+        },
+        {
+          in: 'query',
+          name: 'limit',
+          schema: { type: 'integer', default: 10 },
+          description: 'Số lượng item mỗi trang (mặc định = 10)'
+>>>>>>> Stashed changes
         }
       ],
       responses: {
@@ -310,9 +325,23 @@ export const classSwagger = {
       tags: ['Classes'],
       summary: 'Lấy danh sách lớp của Teacher (id lấy từ token)',
       security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          in: 'query',
+          name: 'page',
+          schema: { type: 'integer', default: 1 },
+          description: 'Trang hiện tại (mặc định = 1)'
+        },
+        {
+          in: 'query',
+          name: 'limit',
+          schema: { type: 'integer', default: 10 },
+          description: 'Số lượng item mỗi trang (mặc định = 10)'
+        }
+      ],
       responses: {
         200: {
-          description: 'Lấy danh sách lớp thành công',
+          description: 'OK',
           content: {
             'application/json': {
               schema: {
@@ -321,34 +350,17 @@ export const classSwagger = {
                   success: { type: 'boolean', example: true },
                   message: { type: 'string', example: 'Lấy danh sách lớp của giáo viên thành công' },
                   data: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        name: { type: 'string', example: 'Mầm 1' },
-                        schoolYear: { type: 'string', example: '2025-2026' },
-                        level: {
-                          type: 'object',
-                          properties: {
-                            id: { type: 'string' },
-                            name: { type: 'string', example: 'Mầm' }
-                          }
-                        },
-                        teachers: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'string' },
-                              fullName: { type: 'string' },
-                              email: { type: 'string' },
-                              role: { type: 'string', example: 'TEACHER' }
-                            }
-                          }
-                        },
-                        createdAt: { type: 'string' },
-                        updatedAt: { type: 'string' }
+                    type: 'object',
+                    properties: {
+                      classes: { type: 'array', items: { type: 'object' } },
+                      pagination: {
+                        type: 'object',
+                        properties: {
+                          page: { type: 'integer', example: 1 },
+                          limit: { type: 'integer', example: 10 },
+                          total: { type: 'integer', example: 3 },
+                          pages: { type: 'integer', example: 1 }
+                        }
                       }
                     }
                   }
