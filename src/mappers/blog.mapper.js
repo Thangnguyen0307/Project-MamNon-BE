@@ -4,6 +4,15 @@ export const toBlogResponse = (blog) => {
         title: blog.title,
         content: blog.content,
         images: blog.images || [],
+        videos: Array.isArray(blog.videos) ? blog.videos.map(v => (
+            v && typeof v === 'object' && v._id ? {
+                _id: v._id,
+                m3u8: v.m3u8,
+                thumbnail: v.thumbnail,
+                status: v.status,
+                createdAt: v.createdAt
+            } : v
+        )) : [],
         author: blog.author ? {
             _id: blog.author._id,
             email: blog.author.email,

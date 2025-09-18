@@ -31,7 +31,11 @@ export const createBlogSchema = Joi.object({
         }),
     
     images: Joi.any().optional(), // Allow images field from form-data
-    image: Joi.any().optional() // Allow single image field from form-data
+    image: Joi.any().optional(), // Allow single image field from form-data
+    videoIds: Joi.alternatives().try(
+        Joi.array().items(Joi.string()).optional(),
+        Joi.string().optional() // Trường hợp form-data gửi 1 giá trị đơn
+    ).optional()
 });
 
 export const updateBlogSchema = Joi.object({

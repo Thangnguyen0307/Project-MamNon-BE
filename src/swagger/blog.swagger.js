@@ -128,10 +128,26 @@ export const blogSwagger = {
                     type: 'string',
                     format: 'binary'
                   },
-                  description: 'File hình ảnh để upload (tối đa 10 file)'
+                  description: 'Các file ảnh (tối đa 10 ảnh)'
+                },
+                videoIds: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Danh sách videoId đã upload (init + chunk) để gắn vào bài viết. Video chưa xử lý sẽ tự cập nhật sau.'
                 }
               },
               required: ['title', 'content', 'class']
+            },
+            examples: {
+              basic: {
+                summary: 'Tạo blog kèm 2 video đang xử lý',
+                value: {
+                  title: 'Hoạt động ngoài trời tuần 1',
+                  content: 'Các bé tham gia trồng cây và chơi vận động...',
+                  class: '66f0c2c9e8e4c2f9f0b12345',
+                  videoIds: ['vid_1726465123456', 'vid_1726465789000']
+                }
+              }
             }
           }
         }
@@ -316,5 +332,6 @@ export const blogSwagger = {
         500: { description: 'Lỗi server' }
       }
     }
-  }
+  },
+  
 };
