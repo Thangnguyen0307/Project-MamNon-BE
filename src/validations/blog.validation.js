@@ -58,7 +58,11 @@ export const updateBlogSchema = Joi.object({
         }),
     
     images: Joi.any().optional(), // Allow images field from form-data
-    image: Joi.any().optional() // Allow single image field from form-data
+    image: Joi.any().optional(), // Allow single image field from form-data
+    existingImages: Joi.alternatives().try(
+        Joi.array().items(Joi.string()),
+        Joi.string()
+    ).optional() // Allow existingImages as array or single string
 });
 
 export const getBlogsQuerySchema = Joi.object({

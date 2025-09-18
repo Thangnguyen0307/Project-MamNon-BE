@@ -115,7 +115,7 @@ export const blogSwagger = {
       requestBody: {
         required: true,
         content: {
-          'application/json': {
+          'multipart/form-data': {
             schema: {
               type: 'object',
               properties: {
@@ -124,8 +124,11 @@ export const blogSwagger = {
                 class: { type: 'string', description: 'ID lớp học' },
                 images: {
                   type: 'array',
-                  items: { type: 'string', description: 'URL hình ảnh đã upload từ /api/images/upload' },
-                  description: 'Danh sách URL hình ảnh liên kết với bài viết'
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'File hình ảnh để upload (tối đa 10 file)'
                 }
               },
               required: ['title', 'content', 'class']
@@ -230,7 +233,7 @@ export const blogSwagger = {
       requestBody: {
         required: true,
         content: {
-          'application/json': {
+          'multipart/form-data': {
             schema: {
               type: 'object',
               properties: {
@@ -239,8 +242,16 @@ export const blogSwagger = {
                 class: { type: 'string', description: 'ID lớp học' },
                 images: {
                   type: 'array',
-                  items: { type: 'string', description: 'URL hình ảnh đã upload từ /api/images/upload' },
-                  description: 'Danh sách URL hình ảnh liên kết với bài viết'
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'File hình ảnh mới để upload (sẽ thêm vào danh sách hiện tại)'
+                },
+                existingImages: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Danh sách URL hình ảnh hiện tại muốn giữ lại'
                 }
               }
             }

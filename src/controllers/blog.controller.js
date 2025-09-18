@@ -1,8 +1,30 @@
 import { blogService } from '../services/blog.service.js';
+import { Class } from '../models/class.model.js';
 
 export const createBlog = async (req, res) => {
     try {
-        const blog = await blogService.create(req.body, req.payload.userId);
+        // Handle image files if uploaded
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            // Get class info to build URL path
+            const classInfo = await Class.findById(req.body.class);
+            if (!classInfo) {
+                return res.status(404).json({ success: false, message: 'Không tìm thấy lớp học' });
+            }
+            
+            const currentDate = new Date().toISOString().split('T')[0];
+            imageUrls = req.files.map(file => 
+                `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`
+            );
+        }
+        
+        // Add image URLs to blog data
+        const blogData = {
+            ...req.body,
+            images: imageUrls
+        };
+        
+        const blog = await blogService.create(blogData, req.payload.userId);
         
         res.status(201).json({
             success: true,
@@ -54,8 +76,38 @@ export const getBlogById = async (req, res) => {
 
 export const updateBlog = async (req, res) => {
     try {
-        // Only accept image URLs in req.body.images
-        const blog = await blogService.update(req.params.id, req.body, req.payload.userId);
+        // Handle new image files if uploaded
+        let newImageUrls = [];
+        if (req.files && req.files.length > 0) {
+            // Get class info to build URL path
+            const classInfo = await Class.findById(req.body.class);
+            if (!classInfo) {
+                return res.status(404).json({ success: false, message: 'Không tìm thấy lớp học' });
+            }
+            
+            const currentDate = new Date().toISOString().split('T')[0];
+            newImageUrls = req.files.map(file => 
+                `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`
+            );
+        }
+        
+        // Combine existing images with new uploads
+        let existingImages = [];
+        if (req.body.existingImages) {
+            // Handle both string and array cases
+            existingImages = Array.isArray(req.body.existingImages) 
+                ? req.body.existingImages 
+                : [req.body.existingImages];
+        }
+        const allImages = [...existingImages, ...newImageUrls];
+        
+        // Add all images to blog data
+        const blogData = {
+            ...req.body,
+            images: allImages
+        };
+        
+        const blog = await blogService.update(req.params.id, blogData, req.payload.userId);
         res.status(200).json({
             success: true,
             message: "Cập nhật bài viết thành công",

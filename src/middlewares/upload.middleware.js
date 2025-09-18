@@ -26,10 +26,11 @@ const createDirectoryPath = async (req, imageType) => {
         
         const avatarPath = path.join(baseUploadPath, 'avatar', userId);
         return avatarPath;
-    } else if (imageType === 'blog') {
-        const classId = req.body.classId;
+    } else {
+        // For blog uploads (from blog API or image API with type=blog)
+        const classId = req.body.classId || req.body.class;
         if (!classId) {
-            throw new Error('classId is required for blog upload');
+            throw new Error('classId or class is required for blog upload');
         }
         
         // Get class information
@@ -39,11 +40,9 @@ const createDirectoryPath = async (req, imageType) => {
         }
         
         const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate);
+        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate, 'image');
         return blogPath;
     }
-    
-    throw new Error('Invalid image type');
 };
 
 // Dynamic storage configuration

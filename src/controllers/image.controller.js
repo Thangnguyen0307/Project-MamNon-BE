@@ -30,7 +30,7 @@ export const uploadImage = async (req, res) => {
             }
             
             const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-            urls = files.map(file => `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/${file.filename}`);
+            urls = files.map(file => `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`);
         }
         
         return res.status(201).json({ success: true, message: 'Upload hình thành công', data: { urls, type: imageType } });
