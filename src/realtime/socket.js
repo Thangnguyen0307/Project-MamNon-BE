@@ -25,6 +25,8 @@ export function initSocket(httpServer) {
       if (!videoId) return;
       socket.leave(`video:${String(videoId)}`);
     });
+
+    messageEvents(socket, io);
   });
 
   return ioInstance;
