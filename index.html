@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Demo</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #conversations {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        #messages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .conversation.active {
+            background: #e6f7ff;
+            font-weight: bold;
+        }
+
+        .conversation.unread {
+            color: red;
+        }
+
+        .message-list {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 5px 0;
+        }
+
+        .message.user {
+            text-align: left;
+            color: #333;
+        }
+
+        .message.staff {
+            text-align: right;
+            color: #007bff;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 5px;
+        }
+
+        .input-area button {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="conversations"></div>
+    <div id="messages">
+        <div class="message-list" id="messageList"></div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type a message..." />
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8080/api";
+        const socket = io("http://localhost:8080");
+
+        let currentConversation = null;
+        let conversations = [];
+        const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGMzODk2YTUzNjUyMmFhNTIxMjZlZjkiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzU4MjU3NjE3LCJleHAiOjE3NjA4NDk2MTd9.L-ZIkTVbdB5kReV2dDplNhx_MAk5wZygZc0TG8qCWXo";
+        // Load tất cả conversations
+        async function loadConversations() {
+            const res = await fetch(`${API_BASE}/conversations?page=1&limit=20`, {
+                headers: {
+                    "Authorization": `Bearer ${TOKEN}`
+                }
+            });
+            const data = await res.json();
+            conversations = data.conversations;
+            renderConversations();
+        }
+
+        function renderConversations() {
+            const container = document.getElementById("conversations");
+            container.innerHTML = "";
+            conversations.forEach(conv => {
+                const div = document.createElement("div");
+                div.className = "conversation" +
+                    (conv.conversation_id === currentConversation?.conversation_id ? " active" : "") +
+                    (conv.unread ? " unread" : "");
+                div.textContent = `${conv.user_name || conv.user_id} - ${conv.last_message?.message || ''}`;
+                div.onclick = () => loadMessages(conv.conversation_id);
+                container.appendChild(div);
+            });
+        }
+
+        // Load messages theo conversation
+        async function loadMessages(conversationId) {
+            currentConversation = conversations.find(c => c.conversation_id === conversationId);
+
+            const res = await fetch(`${API_BASE}/messages/${conversationId}?page=1&limit=20`, {
+                headers: {
+                    "Authorization": `Bearer ${TOKEN}`
+                }
+            });
+            const data = await res.json();
+
+            const messageList = document.getElementById("messageList");
+            messageList.innerHTML = "";
+
+            // đảo ngược mảng trước khi render
+            const orderedMessages = data.messages.slice().reverse();
+
+            orderedMessages.forEach(msg => {
+                const div = document.createElement("div");
+                div.className = "message " + msg.sender.toLowerCase();
+                div.textContent = msg.message;
+                messageList.appendChild(div);
+            });
+
+            // ✅ Clear unread flag khi mở
+            const conv = conversations.find(c => c.conversation_id === conversationId);
+            if (conv) conv.unread = false;
+
+            renderConversations();
+        }
+
+        // Gửi tin nhắn từ staff
+        document.getElementById("sendBtn").onclick = () => {
+            const text = document.getElementById("messageInput").value;
+            if (!text || !currentConversation) return;
+
+            // Staff gửi tin nhắn → gọi API backend (hoặc emit webhook mock)
+            socket.emit("send_message", {
+                userId: currentConversation.user_id,  // userId nhận tin nhắn
+                messageText: text,  // Nội dung tin nhắn
+            });
+
+            document.getElementById("messageInput").value = "";
+        };
+
+        // Nhận tin nhắn mới từ server
+        socket.on("new_message", (data) => {
+            console.log("📩 New message:", data);
+
+            // Update conv list
+            const idx = conversations.findIndex(c => c.conversation_id === data.conversation.conversation_id);
+            if (idx !== -1) {
+                conversations[idx].last_message = data.newMessage;
+                const updated = conversations.splice(idx, 1)[0];
+                conversations.unshift(updated);
+            } else {
+                conversations.unshift({ ...data.conversation, unread: true });
+            }
+
+            // Nếu không phải conv đang mở → mark unread
+            if (currentConversation?.conversation_id !== data.conversation.conversation_id) {
+                const conv = conversations.find(c => c.conversation_id === data.conversation.conversation_id);
+                if (conv) conv.unread = true;
+            }
+
+            renderConversations();
+
+            // Nếu đang mở conv này thì append luôn tin nhắn
+            if (currentConversation?.conversation_id === data.conversation.conversation_id) {
+                const messageList = document.getElementById("messageList");
+                const div = document.createElement("div");
+                div.className = "message " + data.newMessage.sender.toLowerCase();
+                div.textContent = data.newMessage.message;
+                messageList.appendChild(div);
+            }
+        });
+
+        // Load lần đầu
+        loadConversations();
+    </script>
+</body>
+
+</html>

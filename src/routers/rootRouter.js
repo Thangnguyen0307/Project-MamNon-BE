@@ -6,9 +6,11 @@ import classRouter from './class.router.js';
 import levelRouter from './level.router.js';
 import adminRouter from './adminRouter.js';
 import blogRouter from './blog.router.js';
-import webhookZaloRouter from './web-hook-zaloOARouter.js';
+import webhookZaloRouter from './zalo/web-hook-zaloOARouter.js';
 import imageRouter from './image.router.js';
 import videoRouter from './video.router.js';
+import conversationRouter from './zalo/conversation.router.js';
+import messageRouter from './zalo/message.router.js';
 
 const rootRouter = express.Router();
 
@@ -25,4 +27,6 @@ rootRouter.use('/user', userRouter);
 rootRouter.use('/blogs', blogRouter);
 rootRouter.use('/images', imageRouter);
 rootRouter.use('/videos', videoRouter);
+rootRouter.use('/conversations', conversationRouter);
+rootRouter.use('/messages', messageRouter);
 export default rootRouter;

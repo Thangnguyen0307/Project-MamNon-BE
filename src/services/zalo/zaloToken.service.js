@@ -10,6 +10,7 @@ export async function saveZaloToken(oaId, accessToken, refreshToken, expiresIn) 
 }
 
 export async function getValidAccessToken(oaId) {
+    console.log("Lấy token cho OA ID:", oaId);
     let tokenDoc = await ZaloToken.findOne({ oaId });
 
     if (!tokenDoc) {
@@ -24,6 +25,7 @@ export async function getValidAccessToken(oaId) {
     }
 
     // Refresh access_token
+    console.log("Access token sắp hết hạn, tiến hành refresh token...");
     const res = await axios.post(
         'https://oauth.zaloapp.com/v4/oa/access_token',
         qs.stringify({

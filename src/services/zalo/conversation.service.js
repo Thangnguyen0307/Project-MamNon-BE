@@ -39,5 +39,18 @@ export const conversationService = {
         return conversation;
     },
 
+    async getAllConversations({ skip = 0, limit = 20 }) {
+        const conversations = await Conversation.find()
+            .sort({ "last_message.createdAt": -1 }) // sắp xếp theo tin nhắn mới nhất
+            .skip(skip)
+            .limit(limit)
+            .lean(); // trả về object thuần JS
+
+        const total = await Conversation.countDocuments();
+        const pages = Math.ceil(total / limit);
+
+        return { conversations, total, pages };
+    }
+
 
 };

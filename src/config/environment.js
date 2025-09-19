@@ -22,4 +22,5 @@ export const env = {
     ZALO_APP_ID: process.env.ZALO_APP_ID,
     ZALO_SECRET_KEY: process.env.ZALO_SECRET_KEY,
     ZALO_CALLBACK_URL: process.env.ZALO_CALLBACK_URL,
+    ZALO_OA_ID: process.env.ZALO_OA_ID,
 }

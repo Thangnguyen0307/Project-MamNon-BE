@@ -12,6 +12,9 @@ import VideoSchema from '../schemas/video.schema.js';
 import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 import AdminSchema from '../schemas/admin.schema.js';
+import { conversationSwagger } from './conversation.swagger.js';
+import { messageSwagger } from './message.swagger.js';
+
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
@@ -250,6 +253,11 @@ const swaggerDocument = {
                 }
             }
         },
+
+        //------------------- API CONVERSATION
+        ...conversationSwagger,
+        // ------------------- API MESSAGE
+        ...messageSwagger,
 
 
         ...classSwagger,

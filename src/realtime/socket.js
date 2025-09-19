@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { env } from '../config/environment.js';
+import messageEvents from './events/message.event.js';
 
 let ioInstance = null;
 
@@ -26,7 +27,7 @@ export function initSocket(httpServer) {
       socket.leave(`video:${String(videoId)}`);
     });
 
-    messageEvents(socket, io);
+    messageEvents(socket, ioInstance);
   });
 
   return ioInstance;
