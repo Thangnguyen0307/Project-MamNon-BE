@@ -94,6 +94,7 @@ export const blogService = {
         const blog = new Blog({
             ...rest,
             author: authorId,
+            lastEditedBy: authorId,
             images: imagePaths
         });
         
@@ -270,6 +271,7 @@ export const blogService = {
             id,
             {
                 ...restUpdate,
+                lastEditedBy: userId,
                 images: newImages
             },
             { new: true }
@@ -345,6 +347,8 @@ export const blogService = {
         const videoId = videoData?._id || videoData?.videoId || videoData;
         if (!videoId) throw { status:400, message:'Thiếu videoId để gắn vào bài viết' };
         blog.videos.addToSet(videoId);
+        // Cập nhật người chỉnh sửa gần nhất để đồng bộ hành vi realtime
+        blog.lastEditedBy = userId;
         await blog.save();
         await blog.populate([
             { path:'author', select:'email fullName' },
