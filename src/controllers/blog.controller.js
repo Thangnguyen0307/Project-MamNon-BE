@@ -1,5 +1,6 @@
 import { blogService } from '../services/blog.service.js';
 import { Class } from '../models/class.model.js';
+import { slugifySegment } from '../utils/slug.util.js';
 
 export const createBlog = async (req, res) => {
     try {
@@ -13,9 +14,9 @@ export const createBlog = async (req, res) => {
             }
             
             const currentDate = new Date().toISOString().split('T')[0];
-            imageUrls = req.files.map(file => 
-                `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`
-            );
+            const sy = slugifySegment(classInfo.schoolYear);
+            const cn = slugifySegment(classInfo.name);
+            imageUrls = req.files.map(file => `/uploadeds/${sy}/${cn}/${currentDate}/image/${file.filename}`);
         }
         
         // Add image URLs to blog data
@@ -86,9 +87,9 @@ export const updateBlog = async (req, res) => {
             }
             
             const currentDate = new Date().toISOString().split('T')[0];
-            newImageUrls = req.files.map(file => 
-                `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`
-            );
+            const sy = slugifySegment(classInfo.schoolYear);
+            const cn = slugifySegment(classInfo.name);
+            newImageUrls = req.files.map(file => `/uploadeds/${sy}/${cn}/${currentDate}/image/${file.filename}`);
         }
         
         // Combine existing images with new uploads

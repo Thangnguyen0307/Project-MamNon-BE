@@ -4,6 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { Class } from '../models/class.model.js';
 import { User } from '../models/user.model.js';
+import { slugifySegment } from '../utils/slug.util.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +43,13 @@ const createDirectoryPath = async (req, imageType) => {
         }
         
         const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate, 'image');
+        const blogPath = path.join(
+            baseUploadPath,
+            slugifySegment(classInfo.schoolYear),
+            slugifySegment(classInfo.name),
+            currentDate,
+            'image'
+        );
         return blogPath;
     }
 };

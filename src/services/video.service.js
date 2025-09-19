@@ -8,19 +8,11 @@ import { registerProcessor } from '../queues/videoqueue.consumer.js';
 import { addVideoEnsureJob, addVideoUploadS3Job } from '../queues/videoqueue.producer.js';
 import ffmpegStatic from 'ffmpeg-static';
 import { emitVideoEvent } from '../realtime/socket.js';
+import { slugifySegment } from '../utils/slug.util.js';
 
 const FFMPEG_BIN = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
 
-function safeSegment(s){
-  if (!s) return 'unknown';
-  return String(s)
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g,'') // strip accents
-    .replace(/[^a-zA-Z0-9-_\.\s]/g,'')
-    .trim()
-    .replace(/\s+/g,'-')
-    .toLowerCase();
-}
+// use shared slug util for consistent paths
 
 async function resolveStructuredBaseDir(video){
   // Desired: uploadeds/<schoolYear>/<className>/<YYYY-MM-DD>/video/<videoId>
@@ -31,10 +23,9 @@ async function resolveStructuredBaseDir(video){
     if (video.blog){
       const blog = await Blog.findById(video.blog).populate({ path:'class', populate:{ path:'level' } });
       if (blog && blog.class){
-        const schoolYear = blog.class.schoolYear || 'unknown-year';
-        const className = blog.class.name || 'unknown-class';
-  // Use raw values (allow Unicode) to align with image upload structure
-  return path.join('uploadeds', String(schoolYear), String(className), dateSeg, 'video', idStr);
+        const schoolYear = slugifySegment(blog.class.schoolYear || 'unknown-year');
+        const className = slugifySegment(blog.class.name || 'unknown-class');
+        return path.join('uploadeds', schoolYear, className, dateSeg, 'video', idStr);
       }
     }
   } catch {}
