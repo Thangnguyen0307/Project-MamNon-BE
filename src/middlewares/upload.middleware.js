@@ -4,6 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { Class } from '../models/class.model.js';
 import { User } from '../models/user.model.js';
+import { slugifySegment } from '../utils/slug.util.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +43,13 @@ const createDirectoryPath = async (req, imageType) => {
         }
         
         const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-        const blogPath = path.join(baseUploadPath, classInfo.schoolYear, classInfo.name, currentDate, 'image');
+        const blogPath = path.join(
+            baseUploadPath,
+            slugifySegment(classInfo.schoolYear),
+            slugifySegment(classInfo.name),
+            currentDate,
+            'image'
+        );
         return blogPath;
     }
 };
@@ -188,31 +195,3 @@ export const handleMulterError = (error, req, res, next) => {
     
     next(error);
 };
-
-// ========== Video Upload (single) =========
-const videoStorage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    const dir = path.join(__dirname, '../../uploads/temp/videos');
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function(req, file, cb) {
-    const unique = Date.now() + '-' + Math.round(Math.random()*1e9);
-    cb(null, 'video-' + unique + path.extname(file.originalname || '.mp4'));
-  }
-});
-
-const videoFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('video/')) return cb(null, true);
-  cb(new Error('Chỉ chấp nhận file video'), false);
-};
-
-export const uploadSingleBlogVideo = multer({
-  storage: videoStorage,
-  fileFilter: videoFilter,
-  limits: { fileSize: 300 * 1024 * 1024 }
-}).single('video');
-
-// ========== Chunk Upload (memory) =========
-const chunkMemory = multer({ storage: multer.memoryStorage() });
-export const uploadVideoChunk = chunkMemory.any();
