@@ -34,6 +34,8 @@ const createDirectoryPath = async (req, imageType) => {
     } else {
         // For blog uploads (from blog API or image API with type=blog)
         const classId = req.body.classId || req.body.class;
+        console.log('Debug blog upload - req.body:', req.body);
+        console.log('Debug blog upload - classId:', classId);
         if (!classId) {
             throw new Error('classId or class is required for blog upload');
         }
@@ -56,30 +58,103 @@ const createDirectoryPath = async (req, imageType) => {
     }
 };
 
+// ========== AVATAR STORAGE - Riêng biệt ========== //
+const avatarStorage = multer.diskStorage({
+    destination: async function (req, file, cb) {
+        try {
+            const userId = req.payload?.userId;
+            if (!userId) {
+                throw new Error('userId is required for avatar upload');
+            }
+            
+            const baseUploadPath = path.join(__dirname, '../../uploadeds');
+            const avatarPath = path.join(baseUploadPath, 'avatar', userId);
+            
+            // Xóa avatar cũ trước khi lưu avatar mới
+            if (fs.existsSync(avatarPath)) {
+                try {
+                    const existingFiles = fs.readdirSync(avatarPath);
+                    existingFiles.forEach(existingFile => {
+                        const filePath = path.join(avatarPath, existingFile);
+                        fs.unlinkSync(filePath);
+                        console.log(`Đã xóa avatar cũ: ${existingFile}`);
+                    });
+                } catch (error) {
+                    console.error('Lỗi khi xóa avatar cũ:', error);
+                }
+            }
+            
+            // Create directory if it doesn't exist
+            if (!fs.existsSync(avatarPath)) {
+                fs.mkdirSync(avatarPath, { recursive: true });
+            }
+            
+            cb(null, avatarPath);
+        } catch (error) {
+            cb(error);
+        }
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// ========== BLOG STORAGE - Riêng biệt ========== //
+const blogStorage = multer.diskStorage({
+    destination: async function (req, file, cb) {
+        try {
+            const classId = req.body.classId || req.body.class;
+            console.log('Blog storage - classId:', classId);
+            if (!classId) {
+                throw new Error('classId or class is required for blog upload');
+            }
+            
+            // Get class information
+            const classInfo = await Class.findById(classId);
+            if (!classInfo) {
+                throw new Error('Class not found');
+            }
+            
+            const baseUploadPath = path.join(__dirname, '../../uploadeds');
+            const currentDate = new Date().toISOString().split('T')[0];
+            const blogPath = path.join(
+                baseUploadPath,
+                slugifySegment(classInfo.schoolYear),
+                slugifySegment(classInfo.name),
+                currentDate,
+                'image'
+            );
+            
+            console.log('Blog storage - blogPath:', blogPath);
+            
+            // Create directory if it doesn't exist
+            if (!fs.existsSync(blogPath)) {
+                fs.mkdirSync(blogPath, { recursive: true });
+            }
+            
+            cb(null, blogPath);
+        } catch (error) {
+            cb(error);
+        }
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'blog-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// ========== OLD STORAGE - Comment out ========== //
+/*
 // Dynamic storage configuration
 const storage = multer.diskStorage({
     destination: async function (req, file, cb) {
         try {
             const imageType = req.body.type || 'avatar';
+            console.log('Storage debug - req.body.type:', req.body.type);
+            console.log('Storage debug - imageType:', imageType);
+            console.log('Storage debug - req.body:', req.body);
             const destinationPath = await createDirectoryPath(req, imageType);
-            
-            // Xóa avatar cũ trước khi lưu avatar mới (chỉ cho avatar)
-            if (imageType === 'avatar') {
-                const userId = req.payload?.userId;
-                if (userId && fs.existsSync(destinationPath)) {
-                    try {
-                        const existingFiles = fs.readdirSync(destinationPath);
-                        existingFiles.forEach(existingFile => {
-                            const filePath = path.join(destinationPath, existingFile);
-                            fs.unlinkSync(filePath);
-                            console.log(`Đã xóa avatar cũ: ${existingFile}`);
-                        });
-                    } catch (error) {
-                        console.error('Lỗi khi xóa avatar cũ:', error);
-                        // Không return lỗi, tiếp tục upload
-                    }
-                }
-            }
             
             // Create directory if it doesn't exist
             if (!fs.existsSync(destinationPath)) {
@@ -99,8 +174,9 @@ const storage = multer.diskStorage({
         cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
     }
 });
+*/
 
-// File filter
+// File filter chung
 const fileFilter = (req, file, cb) => {
     // Check file type
     if (file.mimetype.startsWith('image/')) {
@@ -110,6 +186,21 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+// Create separate multer instances
+const uploadAvatar = multer({
+    storage: avatarStorage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+const uploadBlog = multer({
+    storage: blogStorage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// ========== OLD UPLOAD - Comment out ========== //
+/*
 // Multer configuration
 const upload = multer({
     storage: storage,
@@ -118,6 +209,7 @@ const upload = multer({
         fileSize: 5 * 1024 * 1024 // 5MB limit
     }
 });
+*/
 
 export const uploadBlogImages = (req, res, next) => {
     // Skip upload if content-type is not multipart/form-data
@@ -126,12 +218,43 @@ export const uploadBlogImages = (req, res, next) => {
         return next();
     }
     
-    // Only support 'images' field for multiple files
+    // Only support 'images' field for multiple files (max 10)
     const fields = [
         { name: 'images', maxCount: 10 }
     ];
     
-    upload.fields(fields)(req, res, (error) => {
+    uploadBlog.fields(fields)(req, res, (error) => {
+        if (error) {
+            return handleMulterError(error, req, res, next);
+        }
+        
+        // Normalize files to req.files array for consistent processing
+        let files = [];
+        if (req.files && req.files.images) {
+            files = req.files.images;
+        }
+        
+        // Set normalized files array
+        req.files = files;
+        
+        next();
+    });
+};
+
+// Middleware for avatar upload - sử dụng uploadAvatar riêng biệt
+export const uploadAvatarImage = (req, res, next) => {
+    // Skip upload if content-type is not multipart/form-data
+    const contentType = req.headers['content-type'];
+    if (!contentType || !contentType.includes('multipart/form-data')) {
+        return next();
+    }
+    
+    // Only support 'images' field for single file
+    const fields = [
+        { name: 'images', maxCount: 1 }  // Avatar chỉ 1 file
+    ];
+    
+    uploadAvatar.fields(fields)(req, res, (error) => {
         if (error) {
             return handleMulterError(error, req, res, next);
         }

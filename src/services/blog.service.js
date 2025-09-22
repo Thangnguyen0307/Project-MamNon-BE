@@ -55,7 +55,7 @@ export const blogService = {
             throw { status: 404, message: "Không tìm thấy lớp học" };
         }
 
-        // Validate author exists
+        // Validate author exists and populate class
         const author = await User.findById(authorId).populate('class');
         if (!author) {
             throw { status: 404, message: "Không tìm thấy tác giả" };
@@ -63,9 +63,21 @@ export const blogService = {
 
         // Check permissions: TEACHER can only create blog for their own class, ADMIN can create for any class
         const role = authorRole || author.role;
+        console.log('Debug create blog - role:', role);
+        console.log('Debug create blog - blogData.class:', blogData.class);
+        
         if (role === 'TEACHER') {
-            if (!author.class || author.class._id.toString() !== blogData.class.toString()) {
-                throw { status: 403, message: "Giáo viên chỉ được tạo blog cho lớp mình dạy" };
+            // For TEACHER: Check if they are assigned to teach this class
+            // Look for class where this teacher is in the teachers array
+            const teacherClass = await Class.findOne({ 
+                _id: blogData.class,
+                teachers: authorId 
+            });
+            
+            console.log('Debug create blog - teacherClass found:', !!teacherClass);
+            
+            if (!teacherClass) {
+                throw { status: 403, message: "Giáo viên chỉ được tạo blog cho lớp mình dạy. Bạn không được phân công dạy lớp này." };
             }
         }
         // ADMIN can create blog for any class, no additional check needed
