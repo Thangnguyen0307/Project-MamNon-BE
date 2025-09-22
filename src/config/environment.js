@@ -14,9 +14,9 @@ export const env = {
     MAIL_PASS: process.env.MAIL_PASS,
     CORS_ORIGIN: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : ['*'],
-    // Queue configs
-    QUEUE_BACKEND: process.env.QUEUE_BACKEND,
-    RABBITMQ_URL: process.env.RABBITMQ_URL,
-    START_QUEUE_CONSUMER: process.env.START_QUEUE_CONSUMER
+    : ['*']
+    // COMMENT: Queue configs to avoid RabbitMQ errors
+    // QUEUE_BACKEND: process.env.QUEUE_BACKEND,
+    // RABBITMQ_URL: process.env.RABBITMQ_URL,
+    // START_QUEUE_CONSUMER: process.env.START_QUEUE_CONSUMER
 }

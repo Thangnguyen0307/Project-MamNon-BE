@@ -1,15 +1,20 @@
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { Blog } from '../models/blog.model.js';
 import { Class } from '../models/class.model.js';
+import { User } from '../models/user.model.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const uploadImage = async (req, res) => {
     const files = req.files;
     if (!files || files.length === 0) {
-        return res.status(400).json({ success: false, message: 'Không có file nào được upload.' });
+        return res.status(400).json({ success: false, message: 'Không có file avatar nào được upload.' });
     }
     
-    const imageType = req.body.type || 'blog';
+    const imageType = req.body.type || 'avatar';
     
     // Validate type
     if (!['blog', 'avatar'].includes(imageType)) {
@@ -20,8 +25,21 @@ export const uploadImage = async (req, res) => {
         let urls = [];
         
         if (imageType === 'avatar') {
-            const userId = req.body.userId;
+            // Lấy userId từ JWT token thay vì từ body
+            const userId = req.payload.userId;
+            
+            // Chỉ cho phép upload 1 avatar
+            if (files.length > 1) {
+                return res.status(400).json({ success: false, message: 'Chỉ được upload 1 avatar.' });
+            }
+            
             urls = files.map(file => `/uploadeds/avatar/${userId}/${file.filename}`);
+            
+            // Cập nhật avatarUrl trong database
+            await User.findByIdAndUpdate(userId, { 
+                avatarUrl: urls[0] 
+            });
+            console.log(`Đã cập nhật avatarUrl cho user ${userId}: ${urls[0]}`);
         } else if (imageType === 'blog') {
             const classId = req.body.classId;
             const classInfo = await Class.findById(classId);
@@ -33,9 +51,21 @@ export const uploadImage = async (req, res) => {
             urls = files.map(file => `/uploadeds/${classInfo.schoolYear}/${classInfo.name}/${currentDate}/image/${file.filename}`);
         }
         
-        return res.status(201).json({ success: true, message: 'Upload hình thành công', data: { urls, type: imageType } });
+        // Tùy chỉnh message theo type
+        const message = imageType === 'avatar' ? 'Upload avatar thành công' : 'Upload hình thành công';
+        
+        return res.status(201).json({ 
+            success: true, 
+            message: message, 
+            data: { 
+                [imageType === 'avatar' ? 'avatarUrl' : 'urls']: imageType === 'avatar' ? urls[0] : urls,
+                type: imageType,
+                ...(imageType === 'avatar' && { userId: req.payload.userId })
+            } 
+        });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Lỗi khi xử lý upload: ' + error.message });
+        const errorMessage = imageType === 'avatar' ? 'Lỗi khi upload avatar: ' : 'Lỗi khi xử lý upload: ';
+        return res.status(500).json({ success: false, message: errorMessage + error.message });
     }
 };
 

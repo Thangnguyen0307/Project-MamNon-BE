@@ -48,18 +48,21 @@ const findAndDeleteImage = (imagePath) => {
 // ============= Blog Service =============
 export const blogService = {
     
-    async create(blogData, authorId) {
+    async create(blogData, authorId, authorRole = null) {
         // Validate class exists
         const classInstance = await Class.findById(blogData.class);
         if (!classInstance) {
             throw { status: 404, message: "Không tìm thấy lớp học" };
         }
 
-        // Validate author exists
+        // Validate author exists - no need to populate class anymore
         const author = await User.findById(authorId);
         if (!author) {
             throw { status: 404, message: "Không tìm thấy tác giả" };
         }
+
+        // Permission already checked in middleware, no need to check again here
+        // ADMIN can create blog for any class, no additional check needed
 
         // Only accept image URLs from blogData.images
         const imagePaths = Array.isArray(blogData.images) ? blogData.images : [];
@@ -206,18 +209,32 @@ export const blogService = {
         return toBlogResponse(blog);
     },
 
-    async update(id, updateData, userId) {
+    async update(id, updateData, userId, userRole = null) {
         const blog = await Blog.findById(id);
         if (!blog) {
             throw { status: 404, message: "Không tìm thấy bài viết" };
         }
 
-        // Check if user is the author or admin
-        if (blog.author.toString() !== userId) {
+        // Get user info if role not provided
+        let role = userRole;
+        if (!role) {
             const user = await User.findById(userId);
-            if (user.role !== 'ADMIN') {
-                throw { status: 403, message: "Không có quyền chỉnh sửa bài viết này" };
+            if (!user) {
+                throw { status: 404, message: "Không tìm thấy người dùng" };
             }
+            role = user.role;
+        }
+
+        // Check permissions
+        if (role === 'ADMIN') {
+            // Admin can update any blog
+        } else if (role === 'TEACHER') {
+            // Teacher can only update their own blog
+            if (blog.author.toString() !== userId) {
+                throw { status: 403, message: "Giáo viên chỉ được chỉnh sửa bài viết của mình" };
+            }
+        } else {
+            throw { status: 403, message: "Không có quyền chỉnh sửa bài viết này" };
         }
 
         // Validate class exists (if provided)
@@ -298,18 +315,32 @@ export const blogService = {
         return toBlogResponse(updatedBlog);
     },
 
-    async delete(id, userId) {
+    async delete(id, userId, userRole = null) {
         const blog = await Blog.findById(id);
         if (!blog) {
             throw { status: 404, message: "Không tìm thấy bài viết" };
         }
 
-        // Check if user is the author or admin
-        if (blog.author.toString() !== userId) {
+        // Get user info if role not provided
+        let role = userRole;
+        if (!role) {
             const user = await User.findById(userId);
-            if (user.role !== 'ADMIN') {
-                throw { status: 403, message: "Không có quyền xóa bài viết này" };
+            if (!user) {
+                throw { status: 404, message: "Không tìm thấy người dùng" };
             }
+            role = user.role;
+        }
+
+        // Check permissions
+        if (role === 'ADMIN') {
+            // Admin can delete any blog
+        } else if (role === 'TEACHER') {
+            // Teacher can only delete their own blog
+            if (blog.author.toString() !== userId) {
+                throw { status: 403, message: "Giáo viên chỉ được xóa bài viết của mình" };
+            }
+        } else {
+            throw { status: 403, message: "Không có quyền xóa bài viết này" };
         }
 
         // Delete all image files associated with this blog
