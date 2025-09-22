@@ -3,7 +3,7 @@ export const imageSwagger = {
     post: {
       security: [{ bearerAuth: [] }],
       tags: ['Images'],
-      summary: 'Upload hình ảnh (blog hoặc avatar)',
+      summary: 'Upload avatar',
       requestBody: {
         required: true,
         content: {
@@ -11,29 +11,10 @@ export const imageSwagger = {
             schema: {
               type: 'object',
               properties: {
-                type: {
-                  type: 'string',
-                  enum: ['blog', 'avatar'],
-                  default: 'blog',
-                  description: 'Loại hình ảnh (blog hoặc avatar)'
-                },
-                classId: {
-                  type: 'string',
-                  description: 'ID của lớp học (bắt buộc khi type = blog)'
-                },
-                userId: {
-                  type: 'string', 
-                  description: 'ID của người dùng (bắt buộc khi type = avatar)'
-                },
                 images: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    format: 'binary'
-                  },
-                  minItems: 1,
-                  maxItems: 10,
-                  description: 'Mảng file hình ảnh để upload (1-10 file)'
+                  type: 'string',
+                  format: 'binary',
+                  description: 'File hình avatar để upload (chỉ 1 file)'
                 }
               },
               required: ['images']

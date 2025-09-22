@@ -16,7 +16,9 @@ const createDirectoryPath = async (req, imageType) => {
     const baseUploadPath = path.join(__dirname, '../../uploadeds');
     
     if (imageType === 'avatar') {
-        const userId = req.body.userId;
+        
+        // Get userId from JWT token (req.payload.userId)
+        const userId = req.payload?.userId || req.body.userId;
         if (!userId) {
             throw new Error('userId is required for avatar upload');
         }
@@ -58,8 +60,26 @@ const createDirectoryPath = async (req, imageType) => {
 const storage = multer.diskStorage({
     destination: async function (req, file, cb) {
         try {
-            const imageType = req.body.type || 'blog';
+            const imageType = req.body.type || 'avatar';
             const destinationPath = await createDirectoryPath(req, imageType);
+            
+            // Xóa avatar cũ trước khi lưu avatar mới (chỉ cho avatar)
+            if (imageType === 'avatar') {
+                const userId = req.payload?.userId;
+                if (userId && fs.existsSync(destinationPath)) {
+                    try {
+                        const existingFiles = fs.readdirSync(destinationPath);
+                        existingFiles.forEach(existingFile => {
+                            const filePath = path.join(destinationPath, existingFile);
+                            fs.unlinkSync(filePath);
+                            console.log(`Đã xóa avatar cũ: ${existingFile}`);
+                        });
+                    } catch (error) {
+                        console.error('Lỗi khi xóa avatar cũ:', error);
+                        // Không return lỗi, tiếp tục upload
+                    }
+                }
+            }
             
             // Create directory if it doesn't exist
             if (!fs.existsSync(destinationPath)) {

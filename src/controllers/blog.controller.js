@@ -25,7 +25,7 @@ export const createBlog = async (req, res) => {
             images: imageUrls
         };
         
-        const blog = await blogService.create(blogData, req.payload.userId);
+        const blog = await blogService.create(blogData, req.payload.userId, req.payload.role);
         
         res.status(201).json({
             success: true,
@@ -108,7 +108,7 @@ export const updateBlog = async (req, res) => {
             images: allImages
         };
         
-        const blog = await blogService.update(req.params.id, blogData, req.payload.userId);
+        const blog = await blogService.update(req.params.id, blogData, req.payload.userId, req.payload.role);
         res.status(200).json({
             success: true,
             message: "Cập nhật bài viết thành công",
@@ -124,7 +124,7 @@ export const updateBlog = async (req, res) => {
 
 export const deleteBlog = async (req, res) => {
     try {
-        const result = await blogService.delete(req.params.id, req.payload.userId);
+        const result = await blogService.delete(req.params.id, req.payload.userId, req.payload.role);
         
         res.status(200).json({
             success: true,

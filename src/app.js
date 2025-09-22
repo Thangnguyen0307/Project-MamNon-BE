@@ -12,7 +12,6 @@ import userRouter from './routers/userRouter.js';
 import path from "path";
 import fs from 'fs';
 import { initSocket } from './realtime/socket.js';
-import { startRabbitConsumer } from './queues/videoqueue.consumer.js';
 
 
 const app = express();
@@ -79,23 +78,22 @@ const apiBase = `${base}/api`;
 
 server.listen(PORT, () => {
     const healthUrl = `${base}/health`;
-    const rabbitUrl = env.RABBITMQ_URL || '(not set)';
+    // COMMENT: RabbitMQ variables to avoid errors
+    // const rabbitUrl = env.RABBITMQ_URL || '(not set)';
 
     console.log(`\n🚀 Server is running on port: ${PORT}`);
     console.log('========================================================');
     console.log(`API Base    : ${apiBase}`);
     console.log(`Health      : ${healthUrl}`);
-    console.log(`RabbitMQ    : ${rabbitUrl}`);
-    console.log('RabbitMQ UI : http://localhost:15672');
+    // COMMENT: RabbitMQ logging to avoid errors
+    // console.log(`RabbitMQ    : ${rabbitUrl}`);
+    // console.log('RabbitMQ UI : http://localhost:15672');
     console.log(`WebSocket   : ${base} (namespace /, event subscribeVideo)`);
     console.log('========================================================\n');
 });
 
 // Kết nối tới MongoDB
 await connectToMongo();
-
-// Khởi động RabbitMQ consumer (tương tự như trong worker)
-await startRabbitConsumer();
 
 seedAdminUser();
 seedLevels();
