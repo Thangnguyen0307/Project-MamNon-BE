@@ -98,4 +98,107 @@ export const userPaths = {
             }
         }
     },
+    '/api/user/teachers': {
+    get: {
+      tags: ['Users'],
+      summary: ' Lấy danh sách giáo viên ',
+      parameters: [
+        {
+          in: 'query',
+          name: 'page',
+          schema: { type: 'integer', minimum: 1, default: 1 },
+          description: 'Trang hiện tại (mặc định = 1)',
+          example: 1
+        },
+        {
+          in: 'query',
+          name: 'limit',
+          schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+          description: 'Số lượng item mỗi trang (mặc định = 10, tối đa = 100)',
+          example: 10
+        }
+      ],
+      responses: {
+        200: {
+          description: 'Lấy danh sách giáo viên thành công',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/GetTeachersResponse' },
+              examples: {
+                success: {
+                  summary: 'Ví dụ thành công',
+                  value: {
+                    success: true,
+                    message: 'Lấy danh sách giáo viên thành công',
+                    data: {
+                      users: [
+                        {
+                          id: '68c7a833691701c8d2a9d3b9',
+                          email: 'teacher1@example.com',
+                          fullName: 'Nguyễn Văn A',
+                          role: 'TEACHER',
+                          isActive: true,
+                          createdAt: '2025-09-12T07:37:29.843Z',
+                          updatedAt: '2025-09-16T05:37:35.796Z'
+                        },
+                        {
+                          id: '68c3c432b180b339805cb5e5',
+                          email: 'teacher2@example.com',
+                          fullName: 'Trần Thị B',
+                          role: 'TEACHER',
+                          isActive: false,
+                          createdAt: '2025-09-13T07:37:34.758Z',
+                          updatedAt: '2025-09-17T05:13:20.832Z'
+                        }
+                      ],
+                      pagination: {
+                        page: 1,
+                        limit: 10,
+                        total: 2,
+                        pages: 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        400: {
+          description: 'Tham số không hợp lệ (page/limit)',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ErrorResponse' },
+              examples: {
+                invalid: {
+                  summary: 'Ví dụ lỗi 400',
+                  value: {
+                    success: false,
+                    message: 'Validation error: "page" must be a number'
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: 'Lỗi server',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/ErrorResponse' },
+              examples: {
+                server: {
+                  summary: 'Ví dụ lỗi 500',
+                  value: {
+                    success: false,
+                    message: 'Lỗi server'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 };
