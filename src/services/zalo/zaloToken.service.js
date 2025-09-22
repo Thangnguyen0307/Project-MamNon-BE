@@ -1,3 +1,6 @@
+import axios from "axios";
+import qs from 'qs';
+import { env } from "../../config/environment.js";
 import { ZaloToken } from "../../models/zalo-token.model.js";
 
 export async function saveZaloToken(oaId, accessToken, refreshToken, expiresIn) {
@@ -26,6 +29,7 @@ export async function getValidAccessToken(oaId) {
 
     // Refresh access_token
     console.log("Access token sắp hết hạn, tiến hành refresh token...");
+    console.log("Refresh token document:", tokenDoc.refreshToken);
     const res = await axios.post(
         'https://oauth.zaloapp.com/v4/oa/access_token',
         qs.stringify({
@@ -41,7 +45,9 @@ export async function getValidAccessToken(oaId) {
         }
     );
 
+
     const data = res.data;
+    console.log("Response from Zalo token refresh:", data);
     tokenDoc.accessToken = data.access_token;
     tokenDoc.refreshToken = data.refresh_token;
     tokenDoc.expiresAt = new Date(Date.now() + data.expires_in * 1000);

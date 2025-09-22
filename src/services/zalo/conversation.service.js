@@ -1,30 +1,25 @@
 import axios from "axios";
 import { Conversation } from "../../models/conversation.model.js";
 import { env } from "../../config/environment.js";
+import { getValidAccessToken } from "./zaloToken.service.js";
 
 export const conversationService = {
 
-    async createConversation(userId, adminId) {
-
-        const ids = [userId, adminId].sort(); // Sort theo thứ tự tăng dần
-        const conversation_id = ids.join('-'); // Nối với dấu '-'
-
+    async createConversation(conversationId) {
+        
         // Kiểm tra nếu Conversation đã tồn tại
-        let conversation = await Conversation.findOne({ conversation_id });
-
-
+        let conversation = await Conversation.findOne({ conversation_id: conversationId });
         // Nếu chưa có, tạo mới conversation
         if (!conversation) {
             conversation = await Conversation.create({
-                user_id: userId,
-                admin_id: adminId,
-                conversation_id,
+                conversation_id: conversationId, 
             });
 
             // Lấy thông tin người dùng từ Zalo API (user_name, user_avatar)
             try {
-                const userInfo = await axios.get(`https://openapi.zalo.me/v3.0/oa/getprofile?user_id=${userId}`, {
-                    headers: { 'access_token': env.ZALO_ACCESS_TOKEN }
+                const access_token = await getValidAccessToken(env.ZALO_OA_ID);
+                const userInfo = await axios.get(`https://openapi.zalo.me/v2.0/oa/getprofile?user_id=${conversationId}`, {
+                    headers: { 'access_token': access_token }
                 });
 
                 console.log('User info from Zalo:', userInfo);

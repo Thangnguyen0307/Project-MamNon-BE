@@ -1,24 +1,29 @@
-import { getValidAccessToken } from "../../services/zalo/zaloToken.service.js";
 import { getIO } from "../socket.js";
-import axios from "axios";
-import { env } from "../../config/environment.js";
+import { messageService } from "../../services/zalo/message.service.js";
+import { conversationService } from "../../services/zalo/conversation.service.js";
+import { SENDER } from "../../constants/sender.constant.js";
+import { MESSAGE_TYPE } from "../../constants/message-type.constant.js";
+import e from "express";
 
 export default function messageEvents(socket, io) {
     console.log("Client đang lắng nghe:", socket.id);
     // Socket ở đây chỉ để subscribe thêm nếu cần
 
     // Nhận sự kiện gửi tin nhắn từ FE
-    socket.on('send_message', async ({ userId, messageText }) => {
-        try {
-            // Gửi tin nhắn qua Zalo API
-            const response = await sendMessageToZalo(userId, messageText);
-            console.log('Message sent to Zalo:', response);
+    socket.on('send_message', async ({ conversationId, messageText, staffId }) => {
+        // Gửi tin nhắn qua Zalo API
+        console.log("Received send_message event:", { conversationId, messageText, staffId });
 
-            // Phát sự kiện trả lời cho FE (hoặc thông báo lỗi nếu có)
-            socket.emit('send_message_response', { success: true, response });
-        } catch (error) {
-            console.error('Error sending message to Zalo:', error);
-            socket.emit('send_message_response', { success: false, message: 'Error sending message' });
+
+        const response = await messageService.sendMessageToZalo(conversationId, messageText);
+
+        if (response && response.error) {
+            console.error("❌ Lỗi khi gửi tin nhắn đến Zalo:", response.error);
+        } else {
+            console.log('Response from Zalo:', response);
+            const conversation = await conversationService.createConversation(userId);
+            const message = await messageService.saveMessage(conversation.conversation_id, SENDER.STAFF, staffId, messageText, MESSAGE_TYPE.TEXT);
+            emitNewMessage(conversation, message);
         }
     });
 }
@@ -28,28 +33,4 @@ export function emitNewMessage(conversation, newMessage) {
     const io = getIO();
     if (!io) return;
     io.emit("new_message", { conversation, newMessage });
-}
-
-async function sendMessageToZalo(userId, messageText) {
-    const accessToken = await getValidAccessToken(env.ZALO_OA_ID);
-    console.log("Access Token:", accessToken);
-
-    const url = "https://openapi.zalo.me/v2.0/oa/message";
-
-    const body = {
-        recipient: {
-            user_id: userId,
-        },
-        message: {
-            text: messageText,
-        },
-    };
-
-    const headers = {
-        "Content-Type": "application/json",
-        "access_token": accessToken,  // Token cấp quyền
-    };
-
-    const response = await axios.post(url, body, { headers });
-    return response.data;
 }

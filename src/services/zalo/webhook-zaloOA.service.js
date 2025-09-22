@@ -7,6 +7,8 @@ import { env } from '../../config/environment.js';
 import { saveZaloToken } from './zaloToken.service.js';
 import { getVerifierByState } from './zaloOA.service.js';
 import { emitNewMessage } from '../../realtime/events/message.event.js';
+import { MESSAGE_TYPE } from '../../constants/message-type.constant.js';
+import { zaloUtil } from '../../utils/zalo.util.js';
 
 export const webhookZaloService = {
     async handleEnvent(event) {
@@ -15,31 +17,54 @@ export const webhookZaloService = {
         const senderId = event.sender.id;
         const recipientId = event.recipient.id;
         const text = event.message.text;
-        let conversation, newMessage;
+        const metadata = event.message.attachments ? event.message.attachments[0].payload : null;
 
-        switch (event.event_name) {
+        console.log("------------------------------------")
+        console.log("Metadata:", metadata);
+        console.log("Sender:", zaloUtil.getSenderType(event.event_name));
+        console.log("Event listeners:", zaloUtil.getEventListeners(event.event_name));
+        console.log("------------------------------------")
 
-            case "user_send_text":
-                console.log("Received a text message sent by customer");
+        let conversation, newMessage, senderType, messageType;
 
-                //Lưu vào DB
-                conversation = await conversationService.createConversation(senderId, recipientId);
-                newMessage = await messageService.saveMessage(conversation.conversation_id, SENDER.USER, senderId, text);
-                // socket emit sự kiện có tin nhắn mới
-                emitNewMessage(conversation, newMessage);
+        const sender = zaloUtil.getSenderType(event.event_name);
+        const eventListeners = zaloUtil.getEventListeners(event.event_name);
+
+        switch (sender) {
+            case "user":
+                console.log("Event from user:", eventListeners);
+                senderType = SENDER.USER;
+                conversation = await conversationService.createConversation(senderId);
                 break;
-
-            case "oa_send_text":
-                console.log("Received a text message sent by OA");
-
-                conversation = await conversationService.createConversation(recipientId, senderId);
-                newMessage = await messageService.saveMessage(conversation.conversation_id, SENDER.STAFF, senderId, text);
-                // socket emit sự kiện có tin nhắn mới
-                emitNewMessage(conversation, newMessage);
+            case "oa":
+                console.log("Event from OA:", eventListeners);
+                senderType = SENDER.ADMIN;
+                conversation = await conversationService.createConversation(recipientId);
                 break;
             default:
-                console.log(`Unhandled event type: ${event.event_name}`);
+                console.log("Unknown sender type");
+                return;
         }
+
+        switch (eventListeners) {
+            case "send_text":
+                messageType = MESSAGE_TYPE.TEXT;
+                break;
+            case "send_link":
+                messageType = MESSAGE_TYPE.LINK;
+                break;
+            case "send_image":
+                messageType = MESSAGE_TYPE.IMAGE;
+                break;
+            case "send_sticker":
+                messageType = MESSAGE_TYPE.STICKER;
+                break;
+            default:
+                console.log("Unknown event listener");
+                return;
+        }
+        newMessage = await messageService.saveMessage(conversation.conversation_id, senderType, senderId, text, messageType, metadata);
+        emitNewMessage(conversation, newMessage);
     },
 
     async handleCallBack(code, oa_id, state) {

@@ -1,4 +1,5 @@
 import { messageService } from "../../services/zalo/message.service.js";
+import path from "path";
 
 export const messageController = {
     async getMessages(req, res) {
@@ -18,4 +19,20 @@ export const messageController = {
             res.status(500).json({ error: error.message });
         }
     },
+
+    async sendImage(req, res) {
+        try {
+            const staffId = req.payload.userId;
+            const { conversationId, description } = req.body;
+
+            const relativeDir = path.relative(process.cwd(), req.file.destination);
+            const imageUrl = path.join(relativeDir, req.file.filename).replace(/\\/g, "/");
+
+            const response = await messageService.sendImageToZalo(conversationId, staffId, description, imageUrl);
+            res.status(200).json({ message: response });
+        } catch (error) {
+            console.log("Send message error:", error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 };
