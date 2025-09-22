@@ -35,3 +35,19 @@ export async function updateUserRole(req, res) {
     if (!user) return res.status(404).json({ message: 'User không tồn tại' });
     res.json(user);
 }
+
+export async function getAllTeachers(req, res) {
+  try {
+    const result = await userService.getAllTeachers(req.query);
+    return res.status(200).json({
+      success: true,
+      message: 'Lấy danh sách giáo viên thành công',
+      data: result // { users, pagination }
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi server'
+    });
+  }
+}
