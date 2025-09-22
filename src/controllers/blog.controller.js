@@ -1,9 +1,74 @@
 import { blogService } from '../services/blog.service.js';
 import { Class } from '../models/class.model.js';
 import { slugifySegment } from '../utils/slug.util.js';
+import fs from 'fs';
 
 export const createBlog = async (req, res) => {
     try {
+        // Check permission early to prevent orphan files
+        const userId = req.payload.userId;
+        const role = req.payload.role;
+        const classId = req.body.class;
+
+        // Check if classId is provided
+        if (!classId) {
+            // Delete uploaded files since validation failed
+            if (req.files && req.files.length > 0) {
+                req.files.forEach(file => {
+                    try {
+                        fs.unlinkSync(file.path);
+                        console.log(`Deleted orphan file: ${file.filename}`);
+                    } catch (err) {
+                        console.error(`Error deleting orphan file: ${file.filename}`, err);
+                    }
+                });
+            }
+            return res.status(400).json({ 
+                success: false, 
+                message: "Thông tin lớp học (classId) là bắt buộc để tạo blog." 
+            });
+        }
+
+        if (role === 'TEACHER') {
+            // Check if teacher is assigned to this class
+            const teacherClass = await Class.findOne({ 
+                _id: classId,
+                teachers: userId 
+            });
+
+            if (!teacherClass) {
+                // Delete uploaded files since permission failed
+                if (req.files && req.files.length > 0) {
+                    req.files.forEach(file => {
+                        try {
+                            fs.unlinkSync(file.path);
+                            console.log(`Deleted orphan file: ${file.filename}`);
+                        } catch (err) {
+                            console.error(`Error deleting orphan file: ${file.filename}`, err);
+                        }
+                    });
+                }
+                
+                // Get class name for better error message
+                let errorMessage = "Giáo viên chỉ được tạo blog cho lớp mình dạy.";
+                try {
+                    const requestedClass = await Class.findById(classId);
+                    if (requestedClass) {
+                        errorMessage += ` Lớp "${requestedClass.name}" không thuộc quyền quản lý của bạn.`;
+                    } else {
+                        errorMessage += ` Lớp với ID "${classId}" không tồn tại.`;
+                    }
+                } catch (error) {
+                    errorMessage += ` ID lớp không hợp lệ: "${classId}".`;
+                }
+                
+                return res.status(403).json({ 
+                    success: false, 
+                    message: errorMessage
+                });
+            }
+        }
+
         // Handle image files if uploaded
         let imageUrls = [];
         if (req.files && req.files.length > 0) {

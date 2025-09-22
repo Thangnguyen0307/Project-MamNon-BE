@@ -43,7 +43,7 @@ export const classService = {
     },
 
     async getAll(query = {}) {
-        const { page = 1, limit = 10, search, level, schoolYear } = query;
+        const { page = 1, limit = 10, search, level, schoolYear, teacher } = query;
         const filter = {};
 
         if (search) {
@@ -56,6 +56,10 @@ export const classService = {
 
         if (schoolYear) {
             filter.schoolYear = schoolYear;
+        }
+
+        if (teacher) {
+            filter.teachers = teacher;
         }
 
         const classes = await Class.find(filter)
