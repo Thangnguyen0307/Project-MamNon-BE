@@ -12,6 +12,9 @@ import VideoSchema from '../schemas/video.schema.js';
 import UserSchema from '../schemas/user.schema.js';
 import { userPaths } from './user.paths.js';
 import AdminSchema from '../schemas/admin.schema.js';
+import { conversationSwagger } from './conversation.swagger.js';
+import { messageSwagger } from './message.swagger.js';
+
 const swaggerDocument = {
     openapi: '3.0.0',
     info: {
@@ -220,6 +223,43 @@ const swaggerDocument = {
                 }
             }
         },
+
+        //------------------- ZALO OA
+        "/api/zalo/pkce": {
+            get: {
+                tags: ["Zalo"],
+                summary: "Tạo mã PKCE cho OAuth",
+                description: "Sinh ra code_verifier, code_challenge và state để bắt đầu flow OAuth2 PKCE với Zalo. Kết quả này cần được lưu để dùng trong bước trao đổi access token.",
+                responses: {
+                    200: {
+                        description: "Sinh mã PKCE thành công",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "object",
+                                    properties: {
+                                        code_verifier: { type: "string", example: "random_string_verifier" },
+                                        code_challenge: { type: "string", example: "hash_of_verifier" },
+                                        state: { type: "string", example: "generated_state_uuid" }
+                                    },
+                                    required: ["code_verifier", "code_challenge", "state"]
+                                }
+                            }
+                        }
+                    },
+                    500: {
+                        description: "Lỗi hệ thống",
+                    }
+                }
+            }
+        },
+
+        //------------------- API CONVERSATION
+        ...conversationSwagger,
+        // ------------------- API MESSAGE
+        ...messageSwagger,
+
+
         ...classSwagger,
         ...levelSwagger,
         ...blogSwagger,
