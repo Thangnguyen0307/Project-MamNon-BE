@@ -11,7 +11,7 @@ import rootRouter from './routers/rootRouter.js';
 import userRouter from './routers/userRouter.js';
 import path from "path";
 import fs from 'fs';
-import { initSocket } from './realtime/socket.js';
+import { initSocket } from './realtime/sockets/index.js';
 import { startRabbitConsumer } from './queues/videoqueue.consumer.js';
 
 

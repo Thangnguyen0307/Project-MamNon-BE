@@ -34,8 +34,13 @@ export async function addJob(job) {
   setTimeout(async () => { try { await ch.close(); await conn.close(); } catch {} }, 100);
 }
 
-export async function addVideoEnsureJob(videoId) {
-  return addJob({ type: 'video.ensure.h264aac', videoId: String(videoId) });
+export async function addVideoEnsureJob(payload) {
+  // Backward compatibility: allow calling with just videoId
+  if (typeof payload === 'string') {
+    return addJob({ type: 'video.ensure.h264aac', videoId: String(payload) });
+  }
+  const { videoId, notifyUserId } = payload || {};
+  return addJob({ type: 'video.ensure.h264aac', videoId: String(videoId), ...(notifyUserId ? { notifyUserId: String(notifyUserId) } : {}) });
 }
 
 export async function addVideoUploadS3Job(payload) {

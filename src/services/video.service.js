@@ -7,7 +7,8 @@ import { spawn } from 'child_process';
 import { registerProcessor } from '../queues/videoqueue.consumer.js';
 import { addVideoEnsureJob, addVideoUploadS3Job } from '../queues/videoqueue.producer.js';
 import ffmpegStatic from 'ffmpeg-static';
-import { emitVideoEvent } from '../realtime/socket.js';
+import { getIO } from '../realtime/sockets/index.js';
+import { emitVideoReady, emitVideoFailed } from '../realtime/sockets/events/video.events.js';
 import { slugifySegment } from '../utils/slug.util.js';
 
 const FFMPEG_BIN = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
@@ -145,7 +146,7 @@ async function assembleAndProcess(video){
 // Register processor with queue consumer (in-memory by default, pluggable to RabbitMQ)
 registerProcessor(async (job) => {
   try { console.log('[Worker] Received job', job); } catch {}
-  const { videoId, type } = job;
+  const { videoId, type, notifyUserId } = job;
   let doc = await Video.findById(videoId);
   if (!doc) throw new Error('VIDEO_NOT_FOUND');
 
@@ -158,7 +159,8 @@ registerProcessor(async (job) => {
       const result = await assembleAndProcess(doc);
       doc = await Video.findByIdAndUpdate(videoId, { status:'ready', m3u8: result.m3u8, thumbnail: result.thumbnail, processingEndedAt: new Date() }, { new:true });
     try { console.log('[Worker] Processing done, status ready', { videoId: String(videoId), m3u8: doc.m3u8 }); } catch {}
-  try { emitVideoEvent(videoId, 'ready', { videoId: String(videoId), m3u8: doc.m3u8, thumbnail: doc.thumbnail, status: 'ready' }); } catch {}
+    // Emit socket event for video ready
+    try { emitVideoReady(getIO(), notifyUserId, { videoId: String(videoId), m3u8: doc.m3u8, thumbnail: doc.thumbnail }); } catch {}
       if (doc.blog) {
         // Ensure blog has reference and relocate assets into structured folder if they were under 'unlinked'
         try { await linkVideosToBlog([String(videoId)], doc.blog); } catch (e) { try { console.log('Relocate after ready failed:', e.message); } catch {} }
@@ -168,7 +170,8 @@ registerProcessor(async (job) => {
     } catch (err){
     try { console.error('[Worker] Processing failed', String(videoId), err.message); } catch {}
     await Video.findByIdAndUpdate(videoId, { status:'failed', error: err.message, processingEndedAt: new Date() });
-  try { emitVideoEvent(videoId, 'failed', { videoId: String(videoId), error: err.message, status: 'failed' }); } catch {}
+    // Emit socket event for video failed
+    try { emitVideoFailed(getIO(), notifyUserId, { videoId: String(videoId), error: err.message }); } catch {}
     }
     return;
   }
@@ -182,14 +185,14 @@ registerProcessor(async (job) => {
   // Unknown job types are acknowledged silently
 });
 
-export async function finalizeIfDone(videoId){
+export async function finalizeIfDone(videoId, notifyUserId){
   const doc = await Video.findById(videoId);
   if (!doc) throw new Error('Video not found');
   if (doc.status === 'ready' || doc.status === 'processing') return doc;
   if (doc.receivedChunks === doc.totalChunks){
     try { console.log('[API] finalizeIfDone -> scheduling', { videoId: String(videoId), received: doc.receivedChunks, total: doc.totalChunks }); } catch {}
     await Video.findByIdAndUpdate(videoId, { status:'uploaded' });
-    await addVideoEnsureJob(videoId);
+    await addVideoEnsureJob({ videoId, notifyUserId });
   }
   return await Video.findById(videoId);
 }
