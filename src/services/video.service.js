@@ -8,7 +8,7 @@ import { registerProcessor } from '../queues/videoqueue.consumer.js';
 import { addVideoEnsureJob, addVideoUploadS3Job } from '../queues/videoqueue.producer.js';
 import ffmpegStatic from 'ffmpeg-static';
 import { getIO } from '../realtime/sockets/index.js';
-import { ROOMS, EVENTS, PAYLOADS } from '../realtime/sockets/video.event.js';
+import { emitVideoReady, emitVideoFailed } from '../realtime/sockets/events/video.events.js';
 import { slugifySegment } from '../utils/slug.util.js';
 
 const FFMPEG_BIN = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
@@ -159,12 +159,8 @@ registerProcessor(async (job) => {
       const result = await assembleAndProcess(doc);
       doc = await Video.findByIdAndUpdate(videoId, { status:'ready', m3u8: result.m3u8, thumbnail: result.thumbnail, processingEndedAt: new Date() }, { new:true });
     try { console.log('[Worker] Processing done, status ready', { videoId: String(videoId), m3u8: doc.m3u8 }); } catch {}
-    // Emit only to acting user's room (per requirement)
-    try {
-      if (notifyUserId && getIO()) {
-        getIO().to(ROOMS.user(notifyUserId)).emit(EVENTS.READY, PAYLOADS.ready({ videoId: String(videoId), m3u8: doc.m3u8, thumbnail: doc.thumbnail }));
-      }
-    } catch {}
+    // Emit socket event for video ready
+    try { emitVideoReady(getIO(), notifyUserId, { videoId: String(videoId), m3u8: doc.m3u8, thumbnail: doc.thumbnail }); } catch {}
       if (doc.blog) {
         // Ensure blog has reference and relocate assets into structured folder if they were under 'unlinked'
         try { await linkVideosToBlog([String(videoId)], doc.blog); } catch (e) { try { console.log('Relocate after ready failed:', e.message); } catch {} }
@@ -174,12 +170,8 @@ registerProcessor(async (job) => {
     } catch (err){
     try { console.error('[Worker] Processing failed', String(videoId), err.message); } catch {}
     await Video.findByIdAndUpdate(videoId, { status:'failed', error: err.message, processingEndedAt: new Date() });
-    // Emit only to acting user's room
-    try {
-      if (notifyUserId && getIO()) {
-        getIO().to(ROOMS.user(notifyUserId)).emit(EVENTS.FAILED, PAYLOADS.failed({ videoId: String(videoId), error: err.message }));
-      }
-    } catch {}
+    // Emit socket event for video failed
+    try { emitVideoFailed(getIO(), notifyUserId, { videoId: String(videoId), error: err.message }); } catch {}
     }
     return;
   }

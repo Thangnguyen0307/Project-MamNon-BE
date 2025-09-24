@@ -1,13 +1,13 @@
 import { Server } from 'socket.io';
 import { env } from '../../config/environment.js';
-import { jwtUtils } from '../../utils/jwt.util.js';
-import { ROOMS } from './video.event.js';
+import { registerVideoHandlers } from './events/video.events.js';
 
-let ioInstance = null;
+let io = null; 
 
 export function initSocket(httpServer) {
+  if (io) return io; // tránh khởi tạo lại
   const origins = Array.isArray(env.CORS_ORIGIN) ? env.CORS_ORIGIN : ['*'];
-  ioInstance = new Server(httpServer, {
+  io = new Server(httpServer, {
     cors: {
       origin: origins.includes('*') ? '*' : origins,
       methods: ['GET','POST','PUT','DELETE','OPTIONS'],
@@ -15,28 +15,21 @@ export function initSocket(httpServer) {
     }
   });
 
-  // Auth middleware
-  ioInstance.use((socket, next) => {
-    try {
-      const raw = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
-      const token = raw?.replace(/^Bearer\s+/i, '') || '';
-      if (!token) return next();
-      const payload = jwtUtils.verifyAccessToken(token);
-      socket.data.user = { userId: payload.userId, role: payload.role };
-      return next();
-    } catch (e) {
-      return next();
-    }
+  io.on('connection', (socket) => {
+    console.log('✅ Socket connected:', socket.id);
+
+    // Register video domain handlers (include identify event)
+    registerVideoHandlers(socket, io);
+
+    socket.on('disconnect', (reason) => {
+      console.log('❌ Socket disconnected:', socket.id, reason);
+    });
   });
 
-  ioInstance.on('connection', (socket) => {
-    const uid = socket.data?.user?.userId;
-    if (uid) socket.join(ROOMS.user(uid));
-  });
-
-  return ioInstance;
+  return io;
 }
 
-export function getIO(){
-  return ioInstance;
+export function getIO() {
+  if (!io) throw new Error('Socket.IO chưa được init');
+  return io;
 }
