@@ -5,5 +5,6 @@ export const toUserResponse = (user) => {
         role: user.role,
         fullName: user.fullName,
         isActive: user.isActive,
+        avatarUrl: user.avatarUrl,
     };
 };

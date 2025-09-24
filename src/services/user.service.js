@@ -70,34 +70,24 @@ export const userService = {
     },
 
     async getAllTeachers(query = {}) {
-    const { page = 1, limit = 10 } = query;
-    const pageNum  = parseInt(page, 10)  || 1;
-    const limitNum = parseInt(limit, 10) || 10;
+        const { page = 1, limit = 10 } = query;
+        const pageNum = parseInt(page, 10) || 1;
+        const limitNum = parseInt(limit, 10) || 10;
 
-    const users = await User.find({ role: 'TEACHER' })
-      .select('email fullName role isActive createdAt updatedAt')
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum)
-      .sort({ createdAt: -1 });
+        const users = await User.find({ role: 'TEACHER' })
+            .skip((pageNum - 1) * limitNum)
+            .limit(limitNum)
+            .sort({ createdAt: -1 });
 
-    const total = await User.countDocuments({ role: 'TEACHER' });
-
-    return {
-      users: users.map(u => ({
-        id: u._id,
-        email: u.email,
-        fullName: u.fullName,
-        role: u.role,
-        isActive: u.isActive,
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt
-      })),
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: Math.ceil(total / limitNum)
-      }
-    };
-  }
+        const total = await User.countDocuments({ role: 'TEACHER' });
+        return {
+            users: users.map(u => toUserResponse(u)),
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total,
+                pages: Math.ceil(total / limitNum)
+            }
+        };
+    }
 };
