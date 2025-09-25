@@ -55,16 +55,4 @@ export function registerVideoHandlers(socket, io) {
     socket.emit('identified', { userId: id });
     console.log('[Socket] User joined room:', `user:${id}`);
   });
-
-  // Video ready notification
-  socket.on('video.emit.ready', ({ userId, videoId, m3u8, thumbnail }) => {
-    if (!userId || !videoId) return;
-    emitVideoReady(io, userId, { videoId, m3u8, thumbnail });
-  });
-
-  // Video failed notification
-  socket.on('video.emit.failed', ({ userId, videoId, error }) => {
-    if (!userId || !videoId) return;
-    emitVideoFailed(io, userId, { videoId, error });
-  });
 }
