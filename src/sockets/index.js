@@ -10,23 +10,23 @@ export function initSocket(httpServer) {
 
 
   // ------------------------------Cấu hình Socket.IO server
-  // io = new Server(httpServer, {
-  //     cors: {
-  //         origin: "*", 
-  //         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  //         credentials: true
-  //     },
-  //     path: "/projects/ragdb/socket.io"
-  // });
+  io = new Server(httpServer, {
+      cors: {
+          origin: "*", 
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          credentials: true
+      },
+      path: "/projects/mam-non-media/socket.io"
+  });
 
   //  ----------------------------Cấu hình Socket.IO Localhost (không có path)
-  io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      credentials: true
-    },
-  });
+  // io = new Server(httpServer, {
+  //   cors: {
+  //     origin: "*",
+  //     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  //     credentials: true
+  //   },
+  // });
 
   io.on('connection', (socket) => {
     console.log('✅ Socket connected:', socket.id);
